@@ -1,16 +1,32 @@
-# This is a sample Python script.
+import rsa
+import threading
+import queue
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+# Create a queue for communication
+q = queue.Queue()
 
+ENCRYPTION_METHOD = "rsa"
+(pubkey, privkey) = rsa.newkeys(512)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def thread1():
+    message = 'Hello from Thread 1'.encode('utf8')
+    crypto = rsa.encrypt(message, pubkey)
+    q.put(crypto)
 
+def thread2():
+    crypto = q.get()
+    message = rsa.decrypt(crypto, privkey).decode('utf8')
+    print(f"Thread 2 received: {message}")
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+if __name__ == "__main__":
+    # Create threads
+    t1 = threading.Thread(target=thread1)
+    t2 = threading.Thread(target=thread2)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # Start threads
+    t1.start()
+    t2.start()
+
+    # Wait for both threads to finish
+    t1.join()
+    t2.join()

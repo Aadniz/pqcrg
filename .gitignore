@@ -1,4 +1,5 @@
 /target
+**/__pycache__
 
 # Temporary SQLite files
 *sqlite-wal

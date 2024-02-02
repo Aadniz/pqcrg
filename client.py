@@ -28,6 +28,7 @@ def client():
 
     # Setting up the socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
     server_address = ('127.0.0.1', PORT)
 
     # Waiting for server to become available

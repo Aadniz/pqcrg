@@ -11,8 +11,8 @@ class Encryption:
     def add_connection(self, host: str, key):
         self.connections[host] = key
 
-    def get_connection_info(self, host, port):
-        return self.connections.get(host, None)
+    def has_connection(self, host):
+        return host in self.connections
 
     def handshake(self) -> str:
         raise NotImplementedError("Subclasses must implement this method.")

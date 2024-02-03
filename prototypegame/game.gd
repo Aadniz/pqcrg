@@ -1,13 +1,17 @@
 extends Node3D
 
-func _input(event):
-	if event.is_action_pressed("menu"):
-		get_tree().change_scene_to_file("res://main_menu.tscn")
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
+@onready var pause_menu = $car/Camera3D/pause_menu
+var paused = false
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	if Input.is_action_just_pressed("pause"):
+		pauseMenu()
+# Called when the node enters the scene tree for the first time.
+func pauseMenu():
+	if paused:
+		pause_menu.hide()
+		Engine.time_scale = 1
+	else:
+		pause_menu.show()
+		Engine.time_scale = 0
+	paused = !paused

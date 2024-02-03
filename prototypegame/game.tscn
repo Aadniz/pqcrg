@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://bkcgkr3bw3qdv"]
+[gd_scene load_steps=10 format=3 uid="uid://bkcgkr3bw3qdv"]
 
 [ext_resource type="Script" path="res://game.gd" id="1_i6f0p"]
 [ext_resource type="Script" path="res://car.gd" id="2_cvreh"]
+[ext_resource type="PackedScene" uid="uid://d0md85xn4okgj" path="res://pause_menu.tscn" id="3_f7hdu"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_5tlra"]
 size = Vector3(50, 1, 50)
@@ -96,3 +97,6 @@ mesh = SubResource("CylinderMesh_q4pkh")
 
 [node name="Camera3D" type="Camera3D" parent="car"]
 transform = Transform3D(-1, 8.74228e-08, 0, 8.74228e-08, 1, 8.74228e-08, 7.64274e-15, 8.74228e-08, -1, 0, 1.14534, -4.56663)
+
+[node name="pause_menu" parent="car/Camera3D" instance=ExtResource("3_f7hdu")]
+visible = false

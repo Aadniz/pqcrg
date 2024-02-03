@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://bkcgkr3bw3qdv"]
+[gd_scene load_steps=9 format=3 uid="uid://bkcgkr3bw3qdv"]
 
-[ext_resource type="Script" path="res://car.gd" id="1_6o0nh"]
+[ext_resource type="Script" path="res://game.gd" id="1_i6f0p"]
+[ext_resource type="Script" path="res://car.gd" id="2_cvreh"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_5tlra"]
 size = Vector3(50, 1, 50)
@@ -25,6 +26,7 @@ height = 0.25
 radial_segments = 12
 
 [node name="game" type="Node3D"]
+script = ExtResource("1_i6f0p")
 
 [node name="ground" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_5tlra")
@@ -36,7 +38,7 @@ shape = SubResource("ConcavePolygonShape3D_l8ixe")
 
 [node name="car" type="VehicleBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.33977, 0)
-script = ExtResource("1_6o0nh")
+script = ExtResource("2_cvreh")
 
 [node name="car_body" type="MeshInstance3D" parent="car"]
 mesh = SubResource("BoxMesh_kfl61")

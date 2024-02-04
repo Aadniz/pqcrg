@@ -1,7 +1,11 @@
 extends Node3D
 
-@onready var pause_menu = $car/Camera3D/pause_menu
+@onready var pause_menu = $car/camera_pivot/Camera3D/pause_menu
+
 var paused = false
+
+func _ready():
+	Engine.time_scale = 1
 
 func _process(delta):
 	if Input.is_action_just_pressed("pause"):

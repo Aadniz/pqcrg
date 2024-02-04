@@ -116,10 +116,13 @@ damping_relaxation = 0.5
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_q4pkh")
 
-[node name="Camera3D" type="Camera3D" parent="car"]
-transform = Transform3D(-1, 8.74228e-08, 0, 8.74228e-08, 1, 8.74228e-08, 7.64274e-15, 8.74228e-08, -1, 0, 1.14534, -4.56663)
+[node name="camera_pivot" type="Node3D" parent="car"]
+top_level = true
 
-[node name="pause_menu" parent="car/Camera3D" instance=ExtResource("3_f7hdu")]
+[node name="Camera3D" type="Camera3D" parent="car/camera_pivot"]
+transform = Transform3D(-1, 8.74228e-08, 5.0822e-21, 8.74228e-08, 1, 8.74228e-08, 7.64274e-15, 8.74228e-08, -1, 0, 0.801157, -3.54749)
+
+[node name="pause_menu" parent="car/camera_pivot/Camera3D" instance=ExtResource("3_f7hdu")]
 visible = false
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]

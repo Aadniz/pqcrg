@@ -1,11 +1,14 @@
-[gd_scene load_steps=12 format=3 uid="uid://bkcgkr3bw3qdv"]
+[gd_scene load_steps=13 format=3 uid="uid://bkcgkr3bw3qdv"]
 
 [ext_resource type="Script" path="res://game.gd" id="1_i6f0p"]
+[ext_resource type="Texture2D" uid="uid://blonlsvjj3tgs" path="res://tile.png" id="2_bplky"]
 [ext_resource type="Script" path="res://car.gd" id="2_cvreh"]
 [ext_resource type="PackedScene" uid="uid://d0md85xn4okgj" path="res://pause_menu.tscn" id="3_f7hdu"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bgms1"]
 albedo_color = Color(1, 0.639216, 0.231373, 1)
+albedo_texture = ExtResource("2_bplky")
+uv1_triplanar = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_5tlra"]
 size = Vector3(500, 1, 500)

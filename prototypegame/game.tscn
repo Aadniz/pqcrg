@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=3 uid="uid://bkcgkr3bw3qdv"]
+[gd_scene load_steps=18 format=3 uid="uid://bkcgkr3bw3qdv"]
 
 [ext_resource type="Script" path="res://game.gd" id="1_i6f0p"]
 [ext_resource type="Texture2D" uid="uid://blonlsvjj3tgs" path="res://tile.png" id="2_bplky"]
 [ext_resource type="Script" path="res://car.gd" id="2_cvreh"]
 [ext_resource type="PackedScene" uid="uid://d0md85xn4okgj" path="res://pause_menu.tscn" id="3_f7hdu"]
+[ext_resource type="Script" path="res://goal.gd" id="5_wqdh5"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bgms1"]
 albedo_color = Color(1, 0.639216, 0.231373, 1)
@@ -15,6 +16,13 @@ size = Vector3(500, 1, 500)
 
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_n0n11"]
 data = PackedVector3Array(-250, 0.5, 250, 250, 0.5, 250, -250, -0.5, 250, 250, 0.5, 250, 250, -0.5, 250, -250, -0.5, 250, 250, 0.5, -250, -250, 0.5, -250, 250, -0.5, -250, -250, 0.5, -250, -250, -0.5, -250, 250, -0.5, -250, 250, 0.5, 250, 250, 0.5, -250, 250, -0.5, 250, 250, 0.5, -250, 250, -0.5, -250, 250, -0.5, 250, -250, 0.5, -250, -250, 0.5, 250, -250, -0.5, -250, -250, 0.5, 250, -250, -0.5, 250, -250, -0.5, -250, 250, 0.5, 250, -250, 0.5, 250, 250, 0.5, -250, -250, 0.5, 250, -250, 0.5, -250, 250, 0.5, -250, -250, -0.5, 250, 250, -0.5, 250, -250, -0.5, -250, 250, -0.5, 250, 250, -0.5, -250, -250, -0.5, -250)
+
+[sub_resource type="PrismMesh" id="PrismMesh_f7d1a"]
+left_to_right = 0.1
+size = Vector3(5, 1, 5)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_n5xag"]
+data = PackedVector3Array(-2, 0.5, 2.5, 2.5, -0.5, 2.5, -2.5, -0.5, 2.5, -2, 0.5, -2.5, -2.5, -0.5, -2.5, 2.5, -0.5, -2.5, -2, 0.5, 2.5, -2, 0.5, -2.5, 2.5, -0.5, 2.5, -2, 0.5, -2.5, 2.5, -0.5, -2.5, 2.5, -0.5, 2.5, -2, 0.5, -2.5, -2, 0.5, 2.5, -2.5, -0.5, -2.5, -2, 0.5, 2.5, -2.5, -0.5, 2.5, -2.5, -0.5, -2.5, -2.5, -0.5, 2.5, 2.5, -0.5, 2.5, -2.5, -0.5, -2.5, 2.5, -0.5, 2.5, 2.5, -0.5, -2.5, -2.5, -0.5, -2.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2tnjf"]
 albedo_color = Color(0.270588, 0.47451, 1, 1)
@@ -36,6 +44,12 @@ bottom_radius = 0.4
 height = 0.25
 radial_segments = 12
 
+[sub_resource type="BoxMesh" id="BoxMesh_wc7si"]
+size = Vector3(1, 5, 5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_heux6"]
+size = Vector3(1, 5, 5)
+
 [node name="game" type="Node3D"]
 script = ExtResource("1_i6f0p")
 
@@ -47,6 +61,15 @@ mesh = SubResource("BoxMesh_5tlra")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ground/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_n0n11")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.4907, 1, 0)
+mesh = SubResource("PrismMesh_f7d1a")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="ground/MeshInstance3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ground/MeshInstance3D/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_n5xag")
 
 [node name="car" type="VehicleBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.74136, 0)
@@ -131,3 +154,15 @@ visible = false
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 14.6118, 0)
 shadow_enabled = true
+
+[node name="goal" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.4472, 3.24005, 0)
+script = ExtResource("5_wqdh5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="goal"]
+mesh = SubResource("BoxMesh_wc7si")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="goal"]
+shape = SubResource("BoxShape3D_heux6")
+
+[connection signal="body_entered" from="goal" to="goal" method="_on_body_entered"]

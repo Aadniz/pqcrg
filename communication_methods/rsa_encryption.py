@@ -13,9 +13,8 @@ from settings import ENCRYPTION_METHOD
 
 
 class RSAEncryption(Communication):
-    def __init__(self, listener: bool = False):
+    def __init__(self):
         super().__init__()
-
         self.pubkey, self.privkey = rsa.newkeys(512)
 
     def send(self, peer: tuple[str, int], message):
@@ -31,6 +30,7 @@ class RSAEncryption(Communication):
             self.add_connection(host, self._sock, server_pubkey)
 
         print(f"[CLIENT]: Sending RSA encrypted message: {message} ...")
+
         # Encrypt the message
         crypto = self.encrypt(host, message)
 
@@ -43,6 +43,7 @@ class RSAEncryption(Communication):
     def recv(self, conn, host):
         if not self.has_connection(host):
             print(f"[SERVER]: Exchanging handshake to: {host} ...")
+
             # Receive the client's public key
             client_pubkey = conn.recv(BUFFER_SIZE).decode('utf-8')
             self.add_connection(host, conn, client_pubkey)
@@ -54,6 +55,7 @@ class RSAEncryption(Communication):
             # Receive the length of the message (4 bytes)
             first_four_bytes = conn.recv(4)
             if not first_four_bytes:
+                print(f"[SERVER]: Connection closed")
                 break
             length = struct.unpack('!I', first_four_bytes)[0]
 

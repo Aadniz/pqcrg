@@ -1,6 +1,7 @@
 import socket
 import struct
 from communication_methods.rsa_encryption import RSAEncryption
+from communication_methods.kyber_aes_cbc_encryption import KyberAESCBCEncryption
 
 from settings import PORT
 from settings import BUFFER_SIZE
@@ -26,5 +27,11 @@ def server():
     This function is the listener thread, e.g. the server.
     :return:
     """
-    encryption = RSAEncryption(True)
+    if ENCRYPTION_METHOD == "rsa":
+        encryption = RSAEncryption()
+    elif ENCRYPTION_METHOD == "kyber":
+        encryption = KyberAESCBCEncryption()
+    else:
+        exit(1)
+
     encryption.listen()

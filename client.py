@@ -1,6 +1,8 @@
 import time
 import socket
 import struct
+
+from communication_methods.kyber_aes_cbc_encryption import KyberAESCBCEncryption
 from communication_methods.rsa_encryption import RSAEncryption
 
 from settings import PORT
@@ -26,7 +28,12 @@ def client():
     :return:
     """
 
-    encryption = RSAEncryption()
+    if ENCRYPTION_METHOD == "rsa":
+        encryption = RSAEncryption()
+    elif ENCRYPTION_METHOD == "kyber":
+        encryption = KyberAESCBCEncryption()
+    else:
+        exit(1)
     server_address = ('127.0.0.1', PORT)
     encryption.send(server_address, 'Hello from client')
     encryption.send(server_address, 'This is very cool')
@@ -36,4 +43,4 @@ def client():
     encryption.send(server_address, 'Three')
     encryption.send(server_address, 'Four')
     encryption.send(server_address, 'YAY!')
-    encryption.close(server_address)
+    exit(0)

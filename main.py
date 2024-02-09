@@ -1,5 +1,4 @@
 import threading
-
 from client import client
 from server import server
 

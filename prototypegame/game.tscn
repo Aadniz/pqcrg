@@ -72,7 +72,7 @@ shape = SubResource("BoxShape3D_heux6")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.22515, 1.18998, 0)
 script = ExtResource("6_im845")
 
-[node name="Label" type="Label" parent="."]
+[node name="speedometer" type="Label" parent="."]
 anchors_preset = -1
 anchor_right = 0.932292
 anchor_bottom = 0.902778

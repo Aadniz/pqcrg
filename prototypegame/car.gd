@@ -18,3 +18,5 @@ func _physics_process(delta):
 	camera_pivot.transform = camera_pivot.transform.interpolate_with(transform, delta *5.0)
 	look_at = look_at.lerp(global_position + linear_velocity, delta * 5.0)
 	camera_3d.look_at(look_at)
+	var speed = get_linear_velocity()
+	Globals.speed = speed

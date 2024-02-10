@@ -1,6 +1,7 @@
 extends Node3D
 
-@onready var pause_menu = $car/camera_pivot/Camera3D/pause_menu
+@onready var pause_menu = $pause_menu
+
 
 var paused = false
 

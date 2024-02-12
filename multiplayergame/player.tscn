@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://53bpqwpntxqw"]
+[gd_scene load_steps=6 format=3 uid="uid://53bpqwpntxqw"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_w8jw2"]
 
@@ -13,8 +13,16 @@ top_radius = 0.4
 bottom_radius = 0.4
 height = 0.2
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_oalw8"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
 [node name="player" type="VehicleBody3D"]
-mass = 500.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.49616, 0)
 script = ExtResource("1_w8jw2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
@@ -26,7 +34,6 @@ shape = SubResource("ConvexPolygonShape3D_ssljt")
 [node name="front_left_wheel" type="VehicleWheel3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -0.6, 0, 0.64)
 use_as_steering = true
-suspension_stiffness = 20.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="front_left_wheel"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
@@ -35,7 +42,6 @@ mesh = SubResource("CylinderMesh_nlerg")
 [node name="front_right_wheel" type="VehicleWheel3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -0.599879, 0, -0.639558)
 use_as_steering = true
-suspension_stiffness = 20.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="front_right_wheel"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
@@ -44,7 +50,6 @@ mesh = SubResource("CylinderMesh_nlerg")
 [node name="back_left_wheel" type="VehicleWheel3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0.458, 0, 0.64)
 use_as_traction = true
-suspension_stiffness = 20.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="back_left_wheel"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
@@ -53,7 +58,6 @@ mesh = SubResource("CylinderMesh_nlerg")
 [node name="back_right_wheel" type="VehicleWheel3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0.457959, 0, -0.639558)
 use_as_traction = true
-suspension_stiffness = 20.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="back_right_wheel"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
@@ -69,3 +73,6 @@ margin = 0.5
 
 [node name="Camera3D" type="Camera3D" parent="cam_origin/SpringArm3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.06066e-07, 0, 2.42651)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_oalw8")

@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://biqyj6ia4qorb"]
+[gd_scene load_steps=7 format=3 uid="uid://biqyj6ia4qorb"]
 
 [ext_resource type="PackedScene" uid="uid://53bpqwpntxqw" path="res://player.tscn" id="1_a015f"]
+[ext_resource type="Script" path="res://game_scene.gd" id="1_wjks6"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_i1nn6"]
 size = Vector2(50, 50)
@@ -8,7 +9,15 @@ size = Vector2(50, 50)
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ixgq7"]
 data = PackedVector3Array(25, 0, 25, -25, 0, 25, 25, 0, -25, -25, 0, 25, -25, 0, -25, 25, 0, -25)
 
+[sub_resource type="BoxMesh" id="BoxMesh_lw2dg"]
+size = Vector3(1, 5, 5)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_ffwdi"]
+data = PackedVector3Array(-0.5, 2.5, 2.5, 0.5, 2.5, 2.5, -0.5, -2.5, 2.5, 0.5, 2.5, 2.5, 0.5, -2.5, 2.5, -0.5, -2.5, 2.5, 0.5, 2.5, -2.5, -0.5, 2.5, -2.5, 0.5, -2.5, -2.5, -0.5, 2.5, -2.5, -0.5, -2.5, -2.5, 0.5, -2.5, -2.5, 0.5, 2.5, 2.5, 0.5, 2.5, -2.5, 0.5, -2.5, 2.5, 0.5, 2.5, -2.5, 0.5, -2.5, -2.5, 0.5, -2.5, 2.5, -0.5, 2.5, -2.5, -0.5, 2.5, 2.5, -0.5, -2.5, -2.5, -0.5, 2.5, 2.5, -0.5, -2.5, 2.5, -0.5, -2.5, -2.5, 0.5, 2.5, 2.5, -0.5, 2.5, 2.5, 0.5, 2.5, -2.5, -0.5, 2.5, 2.5, -0.5, 2.5, -2.5, 0.5, 2.5, -2.5, -0.5, -2.5, 2.5, 0.5, -2.5, 2.5, -0.5, -2.5, -2.5, 0.5, -2.5, 2.5, 0.5, -2.5, -2.5, -0.5, -2.5, -2.5)
+
 [node name="game_scene" type="Node3D"]
+script = ExtResource("1_wjks6")
+player_scene = ExtResource("1_a015f")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("PlaneMesh_i1nn6")
@@ -18,9 +27,41 @@ mesh = SubResource("PlaneMesh_i1nn6")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_ixgq7")
 
-[node name="player" parent="." instance=ExtResource("1_a015f")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.824715, 0)
-
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 11.242, 0)
 shadow_enabled = true
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.03445, 2.57348, 0)
+mesh = SubResource("BoxMesh_lw2dg")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D2/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_ffwdi")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Host" type="Button" parent="CanvasLayer"]
+offset_left = 521.0
+offset_top = 1.0
+offset_right = 565.0
+offset_bottom = 32.0
+text = "Host"
+
+[node name="Join" type="Button" parent="CanvasLayer"]
+offset_left = 744.0
+offset_top = 2.0
+offset_right = 782.0
+offset_bottom = 33.0
+text = "Join"
+
+[node name="spawn_point" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.11044, 3.68238, 0)
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="spawn_point"]
+_spawnable_scenes = PackedStringArray("res://player.tscn")
+spawn_path = NodePath("../..")
+
+[connection signal="pressed" from="CanvasLayer/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="CanvasLayer/Join" to="." method="_on_join_pressed"]

@@ -1,0 +1,3 @@
+[submodule "pqcrypto"]
+	path = library/pqcrypto
+	url = https://github.com/kpdemetriou/pqcrypto.git

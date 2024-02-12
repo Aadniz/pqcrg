@@ -1,25 +1,10 @@
-import socket
-import struct
 from communication_methods.rsa_encryption import RSAEncryption
 from communication_methods.kyber_aes_cbc_encryption import KyberAESCBCEncryption
+from communication_methods.plain import Plain
 
 from settings import PORT
 from settings import BUFFER_SIZE
 from settings import ENCRYPTION_METHOD
-
-
-def recv_message(encryption, connection) -> str|bool:
-    # Receive the length of the message (4 bytes)
-    first_four_bytes = connection.recv(4)
-    if not first_four_bytes:
-        return False
-    length = struct.unpack('!I', first_four_bytes)[0]
-
-    # Receive the rest of the message
-    crypto = connection.recv(length)
-
-    # Decrypt the message
-    return encryption.decrypt(crypto).decode('utf-8')
 
 
 def server():
@@ -31,7 +16,9 @@ def server():
         encryption = RSAEncryption()
     elif ENCRYPTION_METHOD == "kyber":
         encryption = KyberAESCBCEncryption()
+    elif ENCRYPTION_METHOD == None:
+        encryption = Plain()
     else:
-        exit(1)
+        raise Exception(f"{ENCRYPTION_METHOD} not supported")
 
     encryption.listen()

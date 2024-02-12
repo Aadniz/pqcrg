@@ -1,25 +1,10 @@
-import time
-import socket
-import struct
-
 from communication_methods.kyber_aes_cbc_encryption import KyberAESCBCEncryption
 from communication_methods.rsa_encryption import RSAEncryption
+from communication_methods.plain import Plain
 
 from settings import PORT
 from settings import BUFFER_SIZE
 from settings import ENCRYPTION_METHOD
-
-
-def send_message(encryption, host, sock, message):
-    print(f"[CLIENT]: Sending message: {message} ...")
-    # Encrypt the message
-    crypto = encryption.encrypt(host, message)
-
-    # Pack the length of the message as a 4-byte integer
-    length = struct.pack('!I', len(crypto))
-
-    # Send the length followed by the message
-    sock.sendall(length + crypto)
 
 
 def client():
@@ -32,8 +17,11 @@ def client():
         encryption = RSAEncryption()
     elif ENCRYPTION_METHOD == "kyber":
         encryption = KyberAESCBCEncryption()
+    elif ENCRYPTION_METHOD is None:
+        encryption = Plain()
     else:
-        exit(1)
+        raise Exception(f"{ENCRYPTION_METHOD} not supported")
+
     server_address = ('127.0.0.1', PORT)
     encryption.send(server_address, 'Hello from client')
     encryption.send(server_address, 'This is very cool')

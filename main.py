@@ -2,7 +2,17 @@ import threading
 from client import client
 from server import server
 
+from settings import PORT
+from settings import BUFFER_SIZE
+from settings import ENCRYPTION_METHOD
+
 if __name__ == "__main__":
+
+    print(f"[SYSTEM] Using settings:")
+    print(f"   port: {PORT}")
+    print(f"   buffer_size: {BUFFER_SIZE}")
+    print(f"   encryption: {ENCRYPTION_METHOD}")
+
     # Create threads
     t1 = threading.Thread(target=server, name="server")
     t2 = threading.Thread(target=client, name="client")

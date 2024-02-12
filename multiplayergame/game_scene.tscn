@@ -56,12 +56,9 @@ offset_right = 782.0
 offset_bottom = 33.0
 text = "Join"
 
-[node name="spawn_point" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.11044, 3.68238, 0)
-
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="spawn_point"]
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://player.tscn")
-spawn_path = NodePath("../..")
+spawn_path = NodePath("..")
 
 [connection signal="pressed" from="CanvasLayer/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="CanvasLayer/Join" to="." method="_on_join_pressed"]

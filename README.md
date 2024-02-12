@@ -9,6 +9,11 @@ $ python3 -m venv venv
 $ venv/bin/pip install -r requirements.txt
 ```
 
+## Setting up pqcrypto library
+1. Install poetry
+2. Run `poetry install`
+3. Run `python compile.py`
+
 ## Running the script
 ```
 $ python3 main.py

@@ -9,8 +9,8 @@ from settings import ENCRYPTION_METHOD
 
 
 class RSAEncryption(Communication):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, transport_layer):
+        super().__init__(transport_layer)
         self.pubkey, self.privkey = rsa.newkeys(512)
 
     def encrypt(self, host: str, message: str) -> bytes:

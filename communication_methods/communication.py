@@ -8,15 +8,19 @@ from settings import ENCRYPTION_METHOD
 
 class Communication:
     _sock: socket = None
-    _is_listener: bool
     _connections: dict = {}
     """
     self.__connections holds the map of all the info of all communication parties involved
     """
 
-    def __init__(self):
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    def __init__(self, transport_layer):
+        if transport_layer == "tcp":
+            self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        elif transport_layer == "udp":
+            self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        else:
+            raise ValueError("Invalid transport layer. Choose either 'tcp' or 'udp'.")
         self._connections = {}
 
     def send(self, peer: tuple[str, int], message: str):
@@ -30,11 +34,15 @@ class Communication:
         # Encrypt the message
         crypto = self.encrypt(host, message)
 
-        # Pack the length of the message as a 4-byte integer
-        length = struct.pack('!I', len(crypto))
+        if self._sock.type == socket.SOCK_STREAM:
+            # Pack the length of the message as a 4-byte integer
+            length = struct.pack('!I', len(crypto))
+            data = length + crypto
+        else:
+            data = crypto
 
         # Send the length followed by the message
-        self._sock.sendall(length + crypto)
+        self._sock.sendall(data)
 
     def recv(self, conn: socket, host: str):
         if not self.has_connection(host):
@@ -58,16 +66,22 @@ class Communication:
 
     def listen(self):
         self._sock.bind(("127.0.0.1", PORT))
-        self._sock.listen(1)
+        if self._sock.type == socket.SOCK_STREAM:
+            self._sock.listen(1)
 
         while True:
-            conn, client_address = self._sock.accept()
-            host = client_address[0]
-            port = client_address[1]
+            if self._sock.type == socket.SOCK_STREAM:
+                conn, (host, port) = self._sock.accept()
 
-            print(f"[SERVER]: Accepted connection from: {host}:{port} ...")
-            # Start a new thread that waits for messages from this connection
-            threading.Thread(target=self.recv, args=(conn, host)).start()
+                print(f"[SERVER]: Accepted connection from: {host}:{port} ...")
+                # Start a new thread that waits for messages from this connection
+                threading.Thread(target=self.recv, args=(conn, host)).start()
+            elif self._sock.type == socket.SOCK_DGRAM:
+                data1, (host, port) = self._sock.recvfrom(256)
+
+                # Decrypt the message
+                message = self.decrypt(data1, host).decode('utf-8')
+                print(f"[SERVER]: Received encrypted message from {host}: {message}")
 
     def add_connection(self, host: str, conn: socket, key: any):
         self._connections[host] = {

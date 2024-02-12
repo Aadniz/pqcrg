@@ -5,6 +5,7 @@ from communication_methods.plain import Plain
 from settings import PORT
 from settings import BUFFER_SIZE
 from settings import ENCRYPTION_METHOD
+from settings import TRANSPORT_LAYER
 
 
 def client():
@@ -14,11 +15,11 @@ def client():
     """
 
     if ENCRYPTION_METHOD == "rsa":
-        encryption = RSAEncryption()
+        encryption = RSAEncryption(TRANSPORT_LAYER)
     elif ENCRYPTION_METHOD == "kyber":
-        encryption = KyberAESCBCEncryption()
+        encryption = KyberAESCBCEncryption(TRANSPORT_LAYER)
     elif ENCRYPTION_METHOD is None:
-        encryption = Plain()
+        encryption = Plain(TRANSPORT_LAYER)
     else:
         raise Exception(f"{ENCRYPTION_METHOD} not supported")
 

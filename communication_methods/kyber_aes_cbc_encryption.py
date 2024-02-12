@@ -8,8 +8,8 @@ from .communication import Communication
 
 
 class KyberAESCBCEncryption(Communication):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, transport_layer):
+        super().__init__(transport_layer)
         self.pubkey, self.privkey = kyber1024_90s.generate_keypair()
 
     def encrypt(self, host: str, message: str) -> bytes:

@@ -1,3 +1,4 @@
+from communication_methods.frodokem_aes_cbc_encryption import FrodoKEMAESCBCEncryption
 from communication_methods.kyber_aes_cbc_encryption import KyberAESCBCEncryption
 from communication_methods.rsa_encryption import RSAEncryption
 from communication_methods.plain import Plain
@@ -18,6 +19,8 @@ def client():
         encryption = RSAEncryption(TRANSPORT_LAYER)
     elif ENCRYPTION_METHOD == "kyber":
         encryption = KyberAESCBCEncryption(TRANSPORT_LAYER)
+    elif ENCRYPTION_METHOD == "frodo":
+        encryption = FrodoKEMAESCBCEncryption(TRANSPORT_LAYER)
     elif ENCRYPTION_METHOD is None:
         encryption = Plain(TRANSPORT_LAYER)
     else:

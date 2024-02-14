@@ -44,9 +44,10 @@ class Communication:
         # Send the length followed by the message
         self._sock.sendall(data)
 
-    def recv(self, conn: socket, host: str):
+    def recv(self, conn: socket, peer: tuple[str, int]):
+        host, port = peer
         if not self.has_connection(host):
-            self.recv_handshake(host, conn)
+            self.recv_handshake(peer, conn)
 
         while True:
             # Receive the length of the message (4 bytes)
@@ -71,16 +72,23 @@ class Communication:
 
         while True:
             if self._sock.type == socket.SOCK_STREAM:
-                conn, (host, port) = self._sock.accept()
+                conn, addr = self._sock.accept()
+                host, port = addr
 
                 print(f"[SERVER]: Accepted connection from: {host}:{port} ...")
                 # Start a new thread that waits for messages from this connection
-                threading.Thread(target=self.recv, args=(conn, host)).start()
+                threading.Thread(target=self.recv, args=(conn, addr)).start()
             elif self._sock.type == socket.SOCK_DGRAM:
-                data1, (host, port) = self._sock.recvfrom(256)
+                data, addr = self._sock.recvfrom(21520)
+                host, port = addr
+
+                if not self.has_connection(host):
+                    self.recv_handshake(addr, self._sock, data)
+                    if ENCRYPTION_METHOD is not None:
+                        continue
 
                 # Decrypt the message
-                message = self.decrypt(data1, host).decode('utf-8')
+                message = self.decrypt(data, host).decode('utf-8')
                 print(f"[SERVER]: Received encrypted message from {host}: {message}")
 
     def add_connection(self, host: str, conn: socket, key: any):
@@ -102,7 +110,7 @@ class Communication:
     def has_connection(self, host: str) -> bool:
         return host in self._connections
 
-    def recv_handshake(self, host: str, conn: socket = None):
+    def recv_handshake(self, peer: tuple[str, int], conn: socket = None, data: bytes = None):
         raise NotImplementedError("Subclasses must implement this method.")
 
     def send_handshake(self, peer: tuple[str, int]):

@@ -1,16 +1,16 @@
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
-from library.pqcrypto.pqcrypto.kem import kyber768
+from library.pqcrypto.pqcrypto.kem import frodokem1344aes
 import socket
 
 from .communication import Communication
 
 
-class KyberAESCBCEncryption(Communication):
+class FrodoKEMAESCBCEncryption(Communication):
     def __init__(self, transport_layer):
         super().__init__(transport_layer)
-        self.pubkey, self.privkey = kyber768.generate_keypair()
+        self.pubkey, self.privkey = frodokem1344aes.generate_keypair()
 
     def encrypt(self, host: str, message: str) -> bytes:
         if host not in self._connections:
@@ -22,7 +22,7 @@ class KyberAESCBCEncryption(Communication):
 
     def decrypt(self, message: bytes, host: str = None) -> bytes:
         if host is None:
-            raise Exception(f"Kyber-AES requires host to be known when decrypting!")
+            raise Exception(f"FrodoKEM-AES requires host to be known when decrypting!")
         if host not in self._connections:
             raise Exception(f"{host} does not have a public key set!")
         key = self._connections[host]["key"]
@@ -40,11 +40,11 @@ class KyberAESCBCEncryption(Communication):
         if data is not None:
             client_pubkey = data
         elif socket is not None:
-            client_pubkey = conn.recv(1568)
+            client_pubkey = conn.recv(21520)
         else:
             raise Exception(f"conn or data must be set in recv_handshake")
         print(f"[SERVER]: Got handshake: {client_pubkey}")
-        ciphertext, plaintext_original = kyber768.encrypt(client_pubkey)
+        ciphertext, plaintext_original = frodokem1344aes.encrypt(client_pubkey)
         self.add_connection(host, conn, plaintext_original)
 
         print(f"[SERVER]: Using key {plaintext_original}")
@@ -64,9 +64,9 @@ class KyberAESCBCEncryption(Communication):
         self._sock.sendall(self.handshake())
 
         # Receive and store the server's public key
-        ciphertext = self._sock.recv(1568)
+        ciphertext = self._sock.recv(21632)
         print(f"[CLIENT]: Got ciphertext {ciphertext}")
-        plaintext_recovered = kyber768.decrypt(self.privkey, ciphertext)
+        plaintext_recovered = frodokem1344aes.decrypt(self.privkey, ciphertext)
         self.add_connection(host, self._sock, plaintext_recovered)
 
         print(f"[CLIENT]: Using key {plaintext_recovered}")

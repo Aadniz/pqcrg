@@ -1,8 +1,12 @@
 import random
 
-# Settings for the communication
-ENCRYPTION_METHOD = None
+##
+## Settings for the communication
+##
+
+# None, "rsa", "kyber", "frodo"
+ENCRYPTION_METHOD = "frodo"
 PORT = 2522
-#PORT = random.randint(2522, 2622)
 BUFFER_SIZE = 1024
-TRANSPORT_LAYER = "udp"
+# "tcp", "udp"
+TRANSPORT_LAYER = "tcp"

@@ -18,8 +18,10 @@ class Plain(Communication):
     def decrypt(self, message: bytes, host: str = None) -> bytes:
         return message
 
-    def recv_handshake(self, host: str, conn: socket = None):
+    def recv_handshake(self, peer: tuple[str, int], conn: socket = None, data: bytes = None):
+        host, port = peer
         print(f"[SERVER]: Plain text, no handshake to receive")
+        self.add_connection(host, conn, None)
         return
 
     def send_handshake(self, peer: tuple[str, int]):

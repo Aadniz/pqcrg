@@ -28,11 +28,10 @@ def client():
 
     server_address = ('127.0.0.1', PORT)
     encryption.send(server_address, 'Hello from client')
-    encryption.send(server_address, 'This is very cool')
-    encryption.send(server_address, 'innit!!')
+    encryption.send(server_address, 'This is a message')
     encryption.send(server_address, 'One')
     encryption.send(server_address, 'Two')
     encryption.send(server_address, 'Three')
     encryption.send(server_address, 'Four')
-    encryption.send(server_address, 'YAY!')
+    encryption.send(server_address, 'Done')
     exit(0)

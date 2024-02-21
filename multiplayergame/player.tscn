@@ -1,14 +1,22 @@
-[gd_scene load_steps=6 format=3 uid="uid://53bpqwpntxqw"]
+[gd_scene load_steps=8 format=3 uid="uid://53bpqwpntxqw"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_w8jw2"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xde7h"]
+albedo_color = Color(0.905882, 0.501961, 0.407843, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_iyj02"]
+material = SubResource("StandardMaterial3D_xde7h")
 size = Vector3(1.5, 0.5, 1)
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ssljt"]
 points = PackedVector3Array(0.727276, 0.25, 0.488636, -0.727138, -0.25, -0.488636, -0.727138, -0.25, 0.488636, -0.727138, 0.25, -0.488636, 0.727276, -0.25, -0.488636, 0.727276, 0.25, -0.488636, 0.727276, -0.25, 0.488636, -0.727138, 0.25, 0.488636)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o4o01"]
+albedo_color = Color(0.0745098, 0.0745098, 0.0745098, 1)
+
 [sub_resource type="CylinderMesh" id="CylinderMesh_nlerg"]
+material = SubResource("StandardMaterial3D_o4o01")
 top_radius = 0.4
 bottom_radius = 0.4
 height = 0.2

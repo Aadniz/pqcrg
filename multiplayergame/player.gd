@@ -21,3 +21,8 @@ func _physics_process(delta):
 	if is_multiplayer_authority():
 		steering = move_toward(steering, Input.get_axis("right","left")*MAX_STEER,delta*2.5)
 		engine_force = Input.get_axis("backward","forward") * ENGINE_POWER
+		var speed = get_linear_velocity()
+		var temp_string = "Speed: %f"
+		var temp_speed = sqrt(speed.z*speed.z + speed.x*speed.x)
+		var speed_string = temp_string % temp_speed
+		$CanvasLayer/speedometer.text = speed_string

@@ -76,3 +76,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.06066e-07, 0, 2.42651)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_oalw8")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="speedometer" type="Label" parent="CanvasLayer"]
+anchors_preset = -1
+anchor_right = 0.928819
+anchor_bottom = 0.905864
+size_flags_horizontal = 8
+size_flags_vertical = 8
+horizontal_alignment = 2
+vertical_alignment = 2

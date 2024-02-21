@@ -3,7 +3,7 @@ extends VehicleBody3D
 @onready var camera_3d = $cam_origin/SpringArm3D/Camera3D
 
 const MAX_STEER = 0.8
-const ENGINE_POWER = 300
+const ENGINE_POWER = 600
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

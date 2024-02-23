@@ -1,31 +1,44 @@
-/// # Example: Some signed KEX
-/// This protocol has no replay protection!
+use clap;
+use clap::Parser;
+
+/// Loud typing
 ///
+/// Trigger noises when you type
+#[clap(version = "1.0", author, about, long_about = None)]
+struct Cli {
+    /// One or multiple audio files or one or multiple directories containing audio files
+    #[clap(name = "INPUT", default_value = "./sounds/minecraft/villagers")]
+    input: Vec<PathBuf>,
+
+    /// Play sounds in random order
+    #[clap(short, long, default_value = "false")]
+    random: bool,
+
+    /// Play sounds with a random pitch
+    #[clap(short, long, default_value = "false")]
+    pitch: bool,
+
+    /// Set the amount of pitch deviation from 0 - 0.99
+    #[clap(short = 'd', long, default_value = "0.2", value_parser = validate_pitch_deviation)]
+    pitch_deviation: f32,
+}
+
 use oqs::*;
 fn main() -> Result<()> {
-    let sigalg = sig::Sig::new(sig::Algorithm::Dilithium2)?;
-    let kemalg = kem::Kem::new(kem::Algorithm::Kyber512)?;
-    // A's long-term secrets
-    let (a_sig_pk, a_sig_sk) = sigalg.keypair()?;
-    // B's long-term secrets
-    let (b_sig_pk, b_sig_sk) = sigalg.keypair()?;
-
-    // assumption: A has (a_sig_sk, a_sig_pk, b_sig_pk)
-    // assumption: B has (b_sig_sk, b_sig_pk, a_sig_pk)
+    let cli = Cli::parse();
+    let kemalg = kem::Kem::new(kem::Algorithm::Kyber1024)?;
 
     // A -> B: kem_pk, signature
     let (kem_pk, kem_sk) = kemalg.keypair()?;
-    let signature = sigalg.sign(kem_pk.as_ref(), &a_sig_sk)?;
 
     // B -> A: kem_ct, signature
-    sigalg.verify(kem_pk.as_ref(), &signature, &a_sig_pk)?;
     let (kem_ct, b_kem_ss) = kemalg.encapsulate(&kem_pk)?;
-    let signature = sigalg.sign(kem_ct.as_ref(), &b_sig_sk)?;
 
     // A verifies, decapsulates, now both have kem_ss
-    sigalg.verify(kem_ct.as_ref(), &signature, &b_sig_pk)?;
     let a_kem_ss = kemalg.decapsulate(&kem_sk, &kem_ct)?;
     assert_eq!(a_kem_ss, b_kem_ss);
+
+    println!("Hei!");
 
     Ok(())
 }

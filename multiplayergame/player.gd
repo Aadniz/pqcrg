@@ -39,8 +39,11 @@ func pauseMenu():
 	else:
 		$pause_menu.show()
 	paused = !paused
-
-
+ 
+func set_checkpoint(test):
+	$respawn_point.position = test
+	
+	
 func _on_resume_pressed():
 	$pause_menu.hide()
 	paused = !paused

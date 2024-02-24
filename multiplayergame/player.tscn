@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://53bpqwpntxqw"]
+[gd_scene load_steps=10 format=3 uid="uid://53bpqwpntxqw"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_w8jw2"]
 
@@ -29,7 +29,13 @@ properties/1/path = NodePath(".:rotation")
 properties/1/spawn = true
 properties/1/replication_mode = 1
 
-[node name="player" type="VehicleBody3D"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g81gg"]
+albedo_color = Color(1, 1, 0.305882, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_qa0yf"]
+material = SubResource("StandardMaterial3D_g81gg")
+
+[node name="player" type="VehicleBody3D" groups=["player"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.832025, 0)
 mass = 250.0
 script = ExtResource("1_w8jw2")
@@ -134,6 +140,11 @@ metadata/_edit_use_anchors_ = true
 
 [node name="respawn_point" type="Node3D" parent="."]
 top_level = true
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="respawn_point"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.832025, 0)
+mesh = SubResource("SphereMesh_qa0yf")
+skeleton = NodePath("../..")
 
 [node name="pause_menu" type="CanvasLayer" parent="."]
 visible = false

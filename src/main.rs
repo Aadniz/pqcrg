@@ -1,31 +1,35 @@
-use clap;
 use clap::Parser;
+use oqs::*;
 
-/// Loud typing
+mod client;
+mod server;
+
+pub const TCP_PORT: u16 = 2522;
+pub const UDP_PORT: u16 = 2525;
+
+/// Client-Server PQC
 ///
-/// Trigger noises when you type
-#[clap(version = "1.0", author, about, long_about = None)]
+/// Client-Server communication application for PQC
+#[derive(Parser)]
+#[clap(author, about, long_about = None)]
 struct Cli {
-    /// One or multiple audio files or one or multiple directories containing audio files
-    #[clap(name = "INPUT", default_value = "./sounds/minecraft/villagers")]
-    input: Vec<PathBuf>,
-
-    /// Play sounds in random order
-    #[clap(short, long, default_value = "false")]
-    random: bool,
-
-    /// Play sounds with a random pitch
-    #[clap(short, long, default_value = "false")]
-    pitch: bool,
-
-    /// Set the amount of pitch deviation from 0 - 0.99
-    #[clap(short = 'd', long, default_value = "0.2", value_parser = validate_pitch_deviation)]
-    pitch_deviation: f32,
+    /// What type of service are you running, server or client?
+    #[clap(name = "TYPE", default_value = "client")]
+    input: String,
 }
 
-use oqs::*;
 fn main() -> Result<()> {
     let cli = Cli::parse();
+    let type_of_service: String = cli.input;
+    if type_of_service == "server" {
+        let server = server::Server::new();
+        server.listen();
+    } else if type_of_service == "client" {
+        let _client = client::Client::new();
+    } else {
+        panic!("Invalid service type. Please enter either 'server' or 'client'.")
+    }
+    if type_of_service != "server" && type_of_service != "client" {}
     let kemalg = kem::Kem::new(kem::Algorithm::Kyber1024)?;
 
     // A -> B: kem_pk, signature

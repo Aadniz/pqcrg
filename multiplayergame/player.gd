@@ -12,7 +12,10 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	if Input.is_action_just_pressed("respawn"):
+		position = $respawn_point.position
+		rotation=Vector3.ZERO
+		#linear_velocity = Vector3.ZERO
 	
 func _enter_tree():
 	set_multiplayer_authority(name.to_int())

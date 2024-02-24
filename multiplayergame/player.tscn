@@ -130,3 +130,6 @@ size_flags_horizontal = 8
 size_flags_vertical = 8
 horizontal_alignment = 2
 vertical_alignment = 2
+
+[node name="respawn_point" type="Node3D" parent="."]
+top_level = true

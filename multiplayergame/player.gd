@@ -6,6 +6,7 @@ extends VehicleBody3D
 const MAX_STEER = 0.8
 const ENGINE_POWER = 600
 var paused = false
+var respawn_rotation = Vector3.ZERO
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -15,7 +16,7 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	if Input.is_action_just_pressed("respawn"):
-		rotation=Vector3.ZERO
+		rotation = respawn_rotation
 		linear_velocity = Vector3.ZERO
 		position = $respawn_point.position
 	if Input.is_action_just_pressed("menu"):
@@ -40,10 +41,10 @@ func pauseMenu():
 		$pause_menu.show()
 	paused = !paused
  
-func set_checkpoint(test):
-	$respawn_point.position = test
-	
-	
+func set_checkpoint(checkpoint_position):
+	$respawn_point.position = checkpoint_position
+	respawn_rotation = rotation
+
 func _on_resume_pressed():
 	$pause_menu.hide()
 	paused = !paused

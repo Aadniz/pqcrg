@@ -30,7 +30,7 @@ properties/1/spawn = true
 properties/1/replication_mode = 1
 
 [node name="player" type="VehicleBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.49616, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.832025, 0)
 mass = 250.0
 script = ExtResource("1_w8jw2")
 
@@ -130,6 +130,7 @@ size_flags_horizontal = 8
 size_flags_vertical = 8
 horizontal_alignment = 2
 vertical_alignment = 2
+metadata/_edit_use_anchors_ = true
 
 [node name="respawn_point" type="Node3D" parent="."]
 top_level = true

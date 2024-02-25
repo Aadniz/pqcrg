@@ -1,6 +1,5 @@
 use clap::Parser;
 use oqs::*;
-use std::error::Error;
 use std::net::{IpAddr, Ipv4Addr};
 
 mod client;
@@ -29,13 +28,14 @@ fn main() -> Result<()> {
     } else if type_of_service == "client" {
         let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
         let mut client = client::Client::new();
-        client.send(ip, "Hello from client").map_err(print_error);
-        client.send(ip, "This is a message").map_err(print_error);
-        client.send(ip, "One").map_err(print_error);
-        client.send(ip, "Two").map_err(print_error);
-        client.send(ip, "Three").map_err(print_error);
-        client.send(ip, "Four").map_err(print_error);
-        client.send(ip, "Done").map_err(print_error);
+        send_message(&mut client, ip, "Hello from client");
+        send_message(&mut client, ip, "Hello from client");
+        send_message(&mut client, ip, "This is a message");
+        send_message(&mut client, ip, "One");
+        send_message(&mut client, ip, "Two");
+        send_message(&mut client, ip, "Three");
+        send_message(&mut client, ip, "Four");
+        send_message(&mut client, ip, "Done");
     } else {
         panic!("Invalid service type. Please enter either 'server' or 'client'.")
     }
@@ -43,6 +43,15 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn print_error(e: Box<dyn Error>) {
-    eprintln!("{:?}", e);
+/// Sends a message to the specified IP address using the given client.
+///
+/// # Arguments
+///
+/// * `client` - The client to use to send the message.
+/// * `ip` - The IP address to send the message to.
+/// * `msg` - The message to send.
+fn send_message(client: &mut client::Client, ip: IpAddr, msg: &str) {
+    if let Err(error) = client.send(ip, msg) {
+        eprintln!("{:?}", error);
+    }
 }

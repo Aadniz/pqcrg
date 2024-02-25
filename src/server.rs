@@ -1,3 +1,5 @@
+use super::crypter;
+use base64::{engine, Engine as _};
 use oqs::*;
 use std::error::Error;
 use std::io::{Read, Write};
@@ -54,9 +56,10 @@ fn listen_udp(connections: Arc<Mutex<Connections>>) {
         // Get the shared secret for this peer
         let connections = connections.lock().unwrap(); // TODO ?
         if let Some(shared_secret) = connections.get(&peer_addr.ip()) {
-            // Decrypt the data
-            // let data = decrypt(&buf[..amt], shared_secret);
-            println!("Received data: {:?}", &buf);
+            let nonce = &buf[..12];
+            let ciphertext = &buf[12..amt];
+            let data = crypter::decrypt(shared_secret.clone(), nonce, ciphertext).unwrap();
+            println!("Received data: {}", String::from_utf8(data).unwrap());
         } else {
             eprintln!("No shared secret for peer: {}", peer_addr.ip());
         }
@@ -70,19 +73,30 @@ fn handshake(
     let peer_addr = stream.peer_addr()?;
     println!("Incoming TCP connection from: {}", peer_addr);
 
-    let mut buf = [0; 1024]; // Adjust buffer size as needed
-    stream.read(&mut buf)?;
+    let mut buf = vec![0; 1184];
+    stream.read_exact(&mut buf)?;
+    let data = buf;
+    println!("Received: {:?}", base64_vec(&data));
 
-    let kemalg = kem::Kem::new(kem::Algorithm::Kyber1024).unwrap();
+    let kemalg = kem::Kem::new(kem::Algorithm::Kyber768).unwrap();
     let kem_pk = kemalg
-        .public_key_from_bytes(&buf)
+        .public_key_from_bytes(&data)
         .ok_or("Failed to create public key from bytes")?;
     let (kem_ct, kem_ss) = kemalg.encapsulate(&kem_pk).unwrap();
 
     let mut connections = connections.lock().unwrap();
-    connections.insert(peer_addr.ip(), kem_ss);
+    connections.insert(peer_addr.ip(), kem_ss.clone());
+    println!("Shared key is: {:?}", base64_vec(&kem_ss.into_vec()));
 
-    stream.write_all(&kem_ct.into_vec())?;
+    let data2 = kem_ct.into_vec();
+    println!("Size of {}", data2.len());
+    println!("Sent:     {:?}", base64_vec(&data2));
+
+    stream.write_all(&data2)?;
 
     Ok(())
+}
+
+fn base64_vec(data: &Vec<u8>) -> String {
+    return engine::general_purpose::STANDARD.encode(data);
 }

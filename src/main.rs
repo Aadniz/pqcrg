@@ -1,7 +1,10 @@
 use clap::Parser;
 use oqs::*;
+use std::error::Error;
+use std::net::{IpAddr, Ipv4Addr};
 
 mod client;
+mod crypter;
 mod server;
 
 pub const TCP_PORT: u16 = 2522;
@@ -24,24 +27,22 @@ fn main() -> Result<()> {
     if type_of_service == "server" {
         server::listen();
     } else if type_of_service == "client" {
-        let _client = client::Client::new();
+        let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
+        let mut client = client::Client::new();
+        client.send(ip, "Hello from client").map_err(print_error);
+        client.send(ip, "This is a message").map_err(print_error);
+        client.send(ip, "One").map_err(print_error);
+        client.send(ip, "Two").map_err(print_error);
+        client.send(ip, "Three").map_err(print_error);
+        client.send(ip, "Four").map_err(print_error);
+        client.send(ip, "Done").map_err(print_error);
     } else {
         panic!("Invalid service type. Please enter either 'server' or 'client'.")
     }
-    if type_of_service != "server" && type_of_service != "client" {}
-    let kemalg = kem::Kem::new(kem::Algorithm::Kyber1024)?;
-
-    // A -> B: kem_pk, signature
-    let (kem_pk, kem_sk) = kemalg.keypair()?;
-
-    // B -> A: kem_ct, signature
-    let (kem_ct, b_kem_ss) = kemalg.encapsulate(&kem_pk)?;
-
-    // A verifies, decapsulates, now both have kem_ss
-    let a_kem_ss = kemalg.decapsulate(&kem_sk, &kem_ct)?;
-    assert_eq!(a_kem_ss, b_kem_ss);
-
-    println!("Hei!");
 
     Ok(())
+}
+
+fn print_error(e: Box<dyn Error>) {
+    eprintln!("{:?}", e);
 }

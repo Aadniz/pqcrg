@@ -22,8 +22,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     let type_of_service: String = cli.input;
     if type_of_service == "server" {
-        let server = server::Server::new();
-        server.listen();
+        server::listen();
     } else if type_of_service == "client" {
         let _client = client::Client::new();
     } else {

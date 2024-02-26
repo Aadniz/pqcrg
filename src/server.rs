@@ -23,8 +23,8 @@ pub fn listen() {
         super::UDP_PORT
     );
 
-    let connections = Arc::new(Mutex::new(HashMap::new()));
-    let connections_clone = Arc::clone(&connections);
+    let connections : Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
+    let connections_clone : Arc<Mutex<Connections>> = Arc::clone(&connections);
 
     thread::spawn(move || listen_tcp(connections_clone));
     listen_udp(connections);
@@ -123,13 +123,13 @@ fn handshake(
     let data = buf;
     println!("Received: {}", base64_vec(&data));
 
-    let kemalg = kem::Kem::new(kem::Algorithm::Kyber768).unwrap();
+    let kemalg = kem::Kem::new(kem::Algorithm::Kyber768)?;
     let kem_pk = kemalg
         .public_key_from_bytes(&data)
         .ok_or("Failed to create public key from bytes")?;
-    let (kem_ct, kem_ss) = kemalg.encapsulate(&kem_pk).unwrap();
+    let (kem_ct, kem_ss) = kemalg.encapsulate(&kem_pk)?;
 
-    let mut connections = connections.lock().unwrap();
+    let mut connections = connections.lock()?;
     connections.insert(peer_addr.ip(), kem_ss.clone());
     println!("Shared key is: {}", base64_vec(&kem_ss.into_vec()));
 

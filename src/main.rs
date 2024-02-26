@@ -29,7 +29,6 @@ fn main() -> Result<()> {
         let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
         let mut client = client::Client::new();
         send_message(&mut client, ip, "Hello from client");
-        send_message(&mut client, ip, "Hello from client");
         send_message(&mut client, ip, "This is a message");
         send_message(&mut client, ip, "One");
         send_message(&mut client, ip, "Two");

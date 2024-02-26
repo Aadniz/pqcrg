@@ -7,6 +7,7 @@ const MAX_STEER = 0.8
 const ENGINE_POWER = 600
 var paused = false
 var respawn_rotation = Vector3.ZERO
+var respawn_momentum = Vector3.ZERO
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -17,7 +18,7 @@ func _ready():
 func _process(delta):
 	if Input.is_action_just_pressed("respawn"):
 		rotation = respawn_rotation
-		linear_velocity = Vector3.ZERO
+		linear_velocity = respawn_momentum
 		position = $respawn_point.position
 	if Input.is_action_just_pressed("menu"):
 		pauseMenu()
@@ -44,6 +45,7 @@ func pauseMenu():
 func set_checkpoint(checkpoint_position):
 	$respawn_point.position = checkpoint_position
 	respawn_rotation = rotation
+	respawn_momentum = get_linear_velocity()
 
 func _on_resume_pressed():
 	$pause_menu.hide()

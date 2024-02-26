@@ -79,6 +79,12 @@ offset_right = 782.0
 offset_bottom = 33.0
 text = "Join"
 
+[node name="ip_input" type="TextEdit" parent="CanvasLayer"]
+offset_left = 534.0
+offset_top = 48.0
+offset_right = 769.0
+offset_bottom = 102.0
+
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://player.tscn")
 spawn_path = NodePath("..")

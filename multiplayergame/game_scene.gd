@@ -28,7 +28,10 @@ func del_player(id):
 @rpc("any_peer","call_local") func _del_player(id):
 	get_node(str(id)).queue_free()
 
+
 func _on_join_pressed():
-	peer.create_client("127.0.0.1", 7777)
+	var ip = "127.0.0.1"
+	ip = $CanvasLayer/ip_input.get_line(0)
+	peer.create_client(ip, 7777)
 	multiplayer.multiplayer_peer = peer
 	$CanvasLayer.hide()

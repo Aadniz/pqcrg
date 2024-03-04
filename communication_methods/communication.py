@@ -64,6 +64,10 @@ class Communication:
             message = self.decrypt(crypto, host).decode('utf-8')
 
             print(f"[SERVER]: Received encrypted message from {host}: {message}")
+            if message == "Done":
+                self._sock.close()
+                print("Closing connection")
+                return
 
     def listen(self):
         self._sock.bind(("127.0.0.1", PORT))
@@ -78,6 +82,7 @@ class Communication:
                 print(f"[SERVER]: Accepted connection from: {host}:{port} ...")
                 # Start a new thread that waits for messages from this connection
                 threading.Thread(target=self.recv, args=(conn, addr)).start()
+                return
             elif self._sock.type == socket.SOCK_DGRAM:
                 data, addr = self._sock.recvfrom(21520)
                 host, port = addr
@@ -90,6 +95,8 @@ class Communication:
                 # Decrypt the message
                 message = self.decrypt(data, host).decode('utf-8')
                 print(f"[SERVER]: Received encrypted message from {host}: {message}")
+                if message == "Done":
+                    return
 
     def add_connection(self, host: str, conn: socket, key: any):
         self._connections[host] = {

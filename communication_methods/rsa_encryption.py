@@ -24,7 +24,7 @@ class RSAEncryption(Communication):
 
     def recv_handshake(self, peer: tuple[str, int], conn: socket = None, data: bytes = None):
         host, port = peer
-        print(f"[SERVER]: Exchanging handshake to: {host} ...")
+        #print(f"[SERVER]: Exchanging handshake to: {host} ...")
 
         # Receive the client's public key
         if data is not None:
@@ -33,7 +33,7 @@ class RSAEncryption(Communication):
             client_pubkey = conn.recv(BUFFER_SIZE).decode('utf-8')
         else:
             raise Exception(f"conn or data must be set in recv_handshake")
-        print(f"[SERVER]: Got public key {client_pubkey}")
+        #print(f"[SERVER]: Got public key {client_pubkey}")
         self.add_connection(host, conn, rsa.PublicKey.load_pkcs1(client_pubkey))
 
         # Send the server's public key
@@ -44,13 +44,13 @@ class RSAEncryption(Communication):
 
     def send_handshake(self, peer: tuple[str, int]):
         host, port = peer
-        print(f"[CLIENT]: Sending handshake to: {host} ...")
+        #print(f"[CLIENT]: Sending handshake to: {host} ...")
         self._sock.connect(peer)
         self._sock.sendall(self.handshake())
 
         # Receive and store the server's public key
         server_pubkey = self._sock.recv(BUFFER_SIZE)
-        print(f"[CLIENT]: Got public key {server_pubkey}")
+        #print(f"[CLIENT]: Got public key {server_pubkey}")
         self.add_connection(host, self._sock, rsa.PublicKey.load_pkcs1(server_pubkey.decode('utf-8')))
 
     def handshake(self) -> bytes:

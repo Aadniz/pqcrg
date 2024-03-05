@@ -34,7 +34,7 @@ class FrodoKEMAESCBCEncryption(Communication):
 
     def recv_handshake(self, peer: tuple[str, int], conn: socket = None, data: bytes = None):
         host, port = peer
-        print(f"[SERVER]: Exchanging handshake with: {host} ...")
+        #print(f"[SERVER]: Exchanging handshake with: {host} ...")
 
         # Receive the client's public key
         if data is not None:
@@ -43,33 +43,38 @@ class FrodoKEMAESCBCEncryption(Communication):
             client_pubkey = conn.recv(21520)
         else:
             raise Exception(f"conn or data must be set in recv_handshake")
-        print(f"[SERVER]: Got handshake: {client_pubkey}")
+        #print(f"[SERVER]: Got handshake: {client_pubkey}")
         ciphertext, plaintext_original = frodokem1344aes.encrypt(client_pubkey)
         self.add_connection(host, conn, plaintext_original)
 
-        print(f"[SERVER]: Using key {plaintext_original}")
+        #print(f"[SERVER]: Using key {plaintext_original}")
 
         # Send the server's public key
         if self._sock.type == socket.SOCK_STREAM:
             conn.sendall(ciphertext)
         else:
             conn.sendto(ciphertext, peer)
-        print(f"[SERVER]: sending ciphertext {ciphertext}")
+        #print(f"[SERVER]: sending ciphertext {ciphertext}")
 
     def send_handshake(self, peer: tuple[str, int]):
         host, port = peer
-        print(f"[CLIENT]: Sending handshake to: {host}:{port} ...")
-        print(f"[CLIENT]: {self.handshake()}")
+        #print(f"[CLIENT]: Sending handshake to: {host}:{port} ...")
+        #print(f"[CLIENT]: {self.handshake()}")
         self._sock.connect(peer)
         self._sock.sendall(self.handshake())
 
         # Receive and store the server's public key
-        ciphertext = self._sock.recv(21632)
-        print(f"[CLIENT]: Got ciphertext {ciphertext}")
+        ciphertext = b''
+        while len(ciphertext) < 21632:
+            chunk = self._sock.recv(21632 - len(ciphertext))
+            if not chunk:
+                raise Exception("Socket connection broken")
+            ciphertext += chunk
+        #print(f"[CLIENT]: Got ciphertext {ciphertext}")
         plaintext_recovered = frodokem1344aes.decrypt(self.privkey, ciphertext)
         self.add_connection(host, self._sock, plaintext_recovered)
 
-        print(f"[CLIENT]: Using key {plaintext_recovered}")
+        #print(f"[CLIENT]: Using key {plaintext_recovered}")
 
     def handshake(self) -> bytes:
         return self.pubkey

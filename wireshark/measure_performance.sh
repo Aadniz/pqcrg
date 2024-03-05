@@ -14,9 +14,18 @@ fi
 
 for i in {1..100}
 do
-  echo "Starting tshark"
-  mkfifo /tmp/tshark-output
-  tshark -i lo -f 'tcp port 2522 or udp port 2522' -w "$folder/test_$i.pcap" > /tmp/tshark-output 2>&1 &
+  file="$folder/test_$i.pcap"
+  if [ -f "$file" ]; then
+    echo "File $file already exists, skipping..."
+    continue
+  fi
+  echo "Starting tshark, capturing to $file"
+
+  if [ ! -p "/tmp/tshark-output" ]; then
+    mkfifo /tmp/tshark-output
+  fi
+
+  tshark -i lo -f 'tcp port 2522 or udp port 2522' -w "$file" > /tmp/tshark-output 2>&1 &
 
   P=$!
   echo "The PID is $P"
@@ -37,8 +46,4 @@ do
 
   echo "Interrupting PID $P"
   kill -INT "$P"
-
-  # Remove the named pipe
-  rm /tmp/tshark-output
 done
-

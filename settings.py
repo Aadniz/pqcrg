@@ -1,5 +1,3 @@
-import random
-
 ##
 ## Settings for the communication
 ##

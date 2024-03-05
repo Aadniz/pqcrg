@@ -20,12 +20,12 @@ class Plain(Communication):
 
     def recv_handshake(self, peer: tuple[str, int], conn: socket = None, data: bytes = None):
         host, port = peer
-        print(f"[SERVER]: Plain text, no handshake to receive")
+        #print(f"[SERVER]: Plain text, no handshake to receive")
         self.add_connection(host, conn, None)
         return
 
     def send_handshake(self, peer: tuple[str, int]):
-        print(f"[CLIENT]: Plain text, no handshake to send")
+        #print(f"[CLIENT]: Plain text, no handshake to send")
         host, port = peer
         self._sock.connect(peer)
         self.add_connection(host, self._sock, None)

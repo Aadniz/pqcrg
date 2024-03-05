@@ -19,11 +19,11 @@ mkShell rec {
   shellHook = ''
     git submodule init
     git submodule update
-    cd library/pqcrypto
-    poetry build
-    python3 compile.py
-    python3 extend.py
-    cd ../../
+    #cd library/pqcrypto
+    #poetry build
+    #python3 compile.py
+    #python3 extend.py
+    #cd ../../
 
 
     SOURCE_DATE_EPOCH=$(date +%s)

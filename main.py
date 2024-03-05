@@ -9,11 +9,11 @@ from settings import TRANSPORT_LAYER
 
 if __name__ == "__main__":
 
-    print(f"[SYSTEM] Using settings:")
-    print(f"   port: {PORT}")
-    print(f"   buffer_size: {BUFFER_SIZE}")
-    print(f"   encryption: {ENCRYPTION_METHOD}")
-    print(f"   transport layer: {TRANSPORT_LAYER}")
+    #print(f"[SYSTEM] Using settings:")
+    #print(f"   port: {PORT}")
+    #print(f"   buffer_size: {BUFFER_SIZE}")
+    #print(f"   encryption: {ENCRYPTION_METHOD}")
+    #print(f"   transport layer: {TRANSPORT_LAYER}")
 
     # Create threads
     t1 = threading.Thread(target=server, name="server")

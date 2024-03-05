@@ -29,7 +29,7 @@ class Communication:
         if not self.has_connection(host):
             self.send_handshake(peer)
 
-        print(f"[CLIENT]: Sending encrypted message: {message} ...")
+        #print(f"[CLIENT]: Sending encrypted message: {message} ...")
 
         # Encrypt the message
         crypto = self.encrypt(host, message)
@@ -53,8 +53,8 @@ class Communication:
             # Receive the length of the message (4 bytes)
             first_four_bytes = conn.recv(4)
             if not first_four_bytes:
-                print(f"[SERVER]: Connection closed")
                 break
+                #print(f"[SERVER]: Connection closed")
             length = struct.unpack('!I', first_four_bytes)[0]
 
             # Receive the rest of the message
@@ -63,10 +63,10 @@ class Communication:
             # Decrypt the message
             message = self.decrypt(crypto, host).decode('utf-8')
 
-            print(f"[SERVER]: Received encrypted message from {host}: {message}")
+            #print(f"[SERVER]: Received encrypted message from {host}: {message}")
             if message == "Done":
                 self._sock.close()
-                print("Closing connection")
+                #print("Closing connection")
                 return
 
     def listen(self):
@@ -79,7 +79,7 @@ class Communication:
                 conn, addr = self._sock.accept()
                 host, port = addr
 
-                print(f"[SERVER]: Accepted connection from: {host}:{port} ...")
+                #print(f"[SERVER]: Accepted connection from: {host}:{port} ...")
                 # Start a new thread that waits for messages from this connection
                 threading.Thread(target=self.recv, args=(conn, addr)).start()
                 return
@@ -94,7 +94,7 @@ class Communication:
 
                 # Decrypt the message
                 message = self.decrypt(data, host).decode('utf-8')
-                print(f"[SERVER]: Received encrypted message from {host}: {message}")
+                #print(f"[SERVER]: Received encrypted message from {host}: {message}")
                 if message == "Done":
                     return
 
@@ -109,10 +109,11 @@ class Communication:
         if self.has_connection(host):
             conn = self._connections[host]["conn"]
             conn.close()
-            print(f"[CLIENT]: Closed connection to: {host}:{port} ...")
+            #print(f"[CLIENT]: Closed connection to: {host}:{port} ...")
             self._connections.pop(host, None)
         else:
-            print(f"[CLIENT]: No active connection to: {host}:{port} ...")
+            pass
+            #print(f"[CLIENT]: No active connection to: {host}:{port} ...")
 
     def has_connection(self, host: str) -> bool:
         return host in self._connections

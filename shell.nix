@@ -12,6 +12,8 @@ mkShell rec {
     ruff-lsp
     python-lsp-server
     poetry-core
+    stdenv.cc.cc.lib
+    pam
   ]);
 
   # This is very close to how venvShellHook is implemented, but
@@ -19,11 +21,10 @@ mkShell rec {
   shellHook = ''
     git submodule init
     git submodule update
-    #cd library/pqcrypto
-    #poetry build
-    #python3 compile.py
-    #python3 extend.py
-    #cd ../../
+
+    export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
+      stdenv.cc.cc
+    ]}
 
 
     SOURCE_DATE_EPOCH=$(date +%s)

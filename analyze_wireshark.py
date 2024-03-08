@@ -37,6 +37,7 @@ print(f'Average time: {avg_time}\n')
 # Create a histogram of the total times
 plt.hist(total_times, bins=50, alpha=0.5)
 sns.kdeplot(total_times, color='maroon');
+plt.subplots_adjust(left=0.075, right=0.99, top=0.95, bottom=0.09)
 plt.title(f'Distribution of Total Times for {file_name}')
 plt.xlabel('Total Time (ms)')
 plt.ylabel('Frequency')

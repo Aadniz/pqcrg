@@ -9,13 +9,20 @@
       clang
       # Replace llvmPackages with llvmPackages_X, where X is the latest LLVM version (at the time of writing, 16)
       llvmPackages.bintools
-    ];
+    ] ++ (with python3Packages; [
+      stdenv.cc.cc.lib
+    ]);
+
     RUSTC_VERSION = "1.76.0";
     # https://github.com/rust-lang/rust-bindgen#environment-variables
     LIBCLANG_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];
     shellHook = ''
       export PATH=$PATH:''${CARGO_HOME:-~/.cargo}/bin
       export PATH=$PATH:''${RUSTUP_HOME:-~/.rustup}/toolchains/$RUSTC_VERSION-x86_64-unknown-linux-gnu/bin/
+
+      export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
+        pkgs.stdenv.cc.cc
+      ]}
 
       ${pkgs.rustc}/bin/rustc --version
       ${pkgs.rustup}/bin/rustup component add rust-analyzer

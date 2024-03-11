@@ -3,7 +3,6 @@ use oqs::*;
 use std::net::{IpAddr, Ipv4Addr};
 
 mod client;
-mod crypter;
 mod server;
 
 pub const TCP_PORT: u16 = 2522;
@@ -24,7 +23,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     let type_of_service: String = cli.input;
     if type_of_service == "server" {
-        server::listen();
+        server::Server::new().listen();
     } else if type_of_service == "client" {
         let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
         let mut client = client::Client::new();

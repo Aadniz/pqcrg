@@ -36,7 +36,7 @@ data = PackedVector3Array(-1, 2.5, 2500, 1, 2.5, 2500, -1, -2.5, 2500, 1, 2.5, 2
 [node name="Node3D" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.882693, -0.422965, -0.204824, 0, -0.435844, 0.900022, -0.469949, -0.794444, -0.384717, -178.617, 305.362, 431.012)
+transform = Transform3D(0.882693, -0.422965, -0.204824, 0, -0.435844, 0.900022, -0.469949, -0.794444, -0.384717, 0, 20.9545, 0)
 shadow_enabled = true
 
 [node name="VehicleBody3D" parent="." instance=ExtResource("2_gjil3")]
@@ -81,6 +81,17 @@ radius = 10.0
 height = 120.0
 sides = 64
 cone = true
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="Map/Props/Tunnel"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -10, -10, 0)
+radius = 20.0
+height = 100.0
+sides = 64
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Map/Props/Tunnel/CSGCylinder3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 8.35187e-23, 0, 8.35187e-23, 1, 9.99998, 16, 10)
+operation = 2
+size = Vector3(20, 200, 30)
 
 [node name="SpotLight3D" type="SpotLight3D" parent="Map/Props/Tunnel"]
 transform = Transform3D(1, -4.37114e-08, -4.37114e-08, 4.37114e-08, -4.37114e-08, 1, -4.37114e-08, -1, -4.37114e-08, 0, 2, 25)

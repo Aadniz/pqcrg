@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://br5355bilf02q"]
+[gd_scene load_steps=6 format=3 uid="uid://br5355bilf02q"]
 
 [ext_resource type="Texture2D" uid="uid://b8jeyucnc7225" path="res://Tileable classic sand texture.jpg" id="1_ynt2c"]
+[ext_resource type="PackedScene" uid="uid://b6nicylmfjx7j" path="res://player.tscn" id="2_gjil3"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d13kl"]
 albedo_color = Color(0.396078, 0.360784, 0.32549, 1)
@@ -28,3 +29,6 @@ shape = SubResource("ConcavePolygonShape3D_smbt2")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.882693, -0.422965, -0.204824, 0, -0.435844, 0.900022, -0.469949, -0.794444, -0.384716, 0, 20.9545, 0)
 shadow_enabled = true
+
+[node name="VehicleBody3D" parent="." instance=ExtResource("2_gjil3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.346471, 0.827439, -0.721645)

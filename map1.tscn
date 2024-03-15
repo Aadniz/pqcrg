@@ -41,6 +41,7 @@ shadow_enabled = true
 
 [node name="VehicleBody3D" parent="." instance=ExtResource("2_gjil3")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.346471, 0.827439, -0.721645)
+center_of_mass = Vector3(0.2, -0.1, 0)
 
 [node name="Map" type="Node" parent="."]
 

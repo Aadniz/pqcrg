@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://b6nicylmfjx7j"]
+[gd_scene load_steps=8 format=3 uid="uid://b6nicylmfjx7j"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_r3jdc"]
 [ext_resource type="PackedScene" uid="uid://c501kbu07s40j" path="res://car.gltf" id="2_3dq6i"]
@@ -17,6 +17,14 @@ height = 0.5
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_73qk1"]
 points = PackedVector3Array(1.95743, 1.19207, -0.21214, 2.06919, 1.0604, 0.361271, 3.83573, -0.47637, -0.765852, -1.72838, 0.345401, -0.888415, 3.69261, -0.641187, 0.584952, -1.6204, 0.165994, 0.639195, 3.76168, 0.345401, -0.888415, -1.80245, -0.476375, -0.765857, -0.00639135, 0.932855, 0.640922, 3.74213, 0.250817, 0.554654, 0.0616539, 1.20629, -0.30099, 1.69477, -0.596714, -0.804321, -1.41951, -0.706352, 0.56848, 2.80899, 0.250817, 0.72698, -1.80403, 0.338894, 0.400726, 3.85597, 0.534774, -0.509734, 1.91715, 0.905894, -0.616108, -1.71452, -0.277612, 0.665002, -1.82267, 0.534774, -0.509734, 0.764143, -0.424835, -0.88662, 3.4528, -0.70635, 0.568478, 2.10477, 0.753023, 0.71134, 3.91054, -0.201194, 0.59411, -1.02533, -0.599894, -0.721892, -0.239705, 1.0047, 0.460487, -0.775691, 0.250817, 0.72698, 3.22807, -0.599665, 0.639087, -1.87731, -0.201205, 0.594125, 2.9609, 0.926982, -0.379625, 3.83729, 0.338893, 0.400719, -0.917427, 0.923443, -0.209937, 2.27256, 1.00475, 0.460522)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_s5f4k"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [node name="VehicleBody3D" type="VehicleBody3D"]
 center_of_mass_mode = 1
@@ -101,5 +109,8 @@ transform = Transform3D(-1.44248e-08, 0, -0.33, 0, 0.33, 0, 0.33, 0, -1.44248e-0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(-1.04781e-08, 0, -1.60316, 0, 0.33, 0, 0.239711, 0, -7.00762e-08, -0.114463, 0.0294671, -0.243708)
 shape = SubResource("ConvexPolygonShape3D_73qk1")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_s5f4k")
 
 [editable path="car"]

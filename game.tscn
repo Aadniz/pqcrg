@@ -1,0 +1,105 @@
+[gd_scene load_steps=7 format=3 uid="uid://drjo36pnay0kq"]
+
+[ext_resource type="Script" path="res://game.gd" id="1_04fbu"]
+[ext_resource type="PackedScene" uid="uid://br5355bilf02q" path="res://map1.tscn" id="1_jinpw"]
+[ext_resource type="PackedScene" uid="uid://b6nicylmfjx7j" path="res://player.tscn" id="2_3b7ii"]
+[ext_resource type="Script" path="res://menu.gd" id="4_wbwl5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t88ej"]
+bg_color = Color(0.157331, 0.193666, 0.402028, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ut22x"]
+bg_color = Color(0.157331, 0.193666, 0.402028, 1)
+
+[node name="Node" type="Node"]
+script = ExtResource("1_04fbu")
+player_scene = ExtResource("2_3b7ii")
+
+[node name="Map" parent="." instance=ExtResource("1_jinpw")]
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_wbwl5")
+player_scene = ExtResource("2_3b7ii")
+
+[node name="MarginContainer" type="MarginContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 400
+theme_override_constants/margin_top = 150
+theme_override_constants/margin_right = 400
+theme_override_constants/margin_bottom = 150
+
+[node name="Panel" type="Panel" parent="UI/MarginContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/MarginContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/MarginContainer/Panel/MarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="RichTextLabel" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/normal_font_size = 48
+text = "MAIN MENU"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="IpTextEdit" type="TextEdit" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/background_color = Color(0.156863, 0.192157, 0.403922, 1)
+placeholder_text = "127.0.0.1"
+scroll_fit_content_height = true
+caret_type = 1
+
+[node name="PortTextEdit" type="TextEdit" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.6
+theme_override_colors/background_color = Color(0.157331, 0.193666, 0.402028, 1)
+placeholder_text = "2522"
+scroll_fit_content_height = true
+caret_type = 1
+
+[node name="JoinButton" type="Button" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_t88ej")
+text = "Join"
+
+[node name="HostButton" type="Button" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_ut22x")
+text = "Host"
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://player.tscn")
+spawn_path = NodePath("..")
+
+[connection signal="pressed" from="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]

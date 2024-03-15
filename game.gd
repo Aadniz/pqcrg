@@ -46,6 +46,5 @@ func _on_host_button_pressed():
 func add_player(id=1):
 	var player = player_scene.instantiate()
 	player.name = str(id)
-	#if is_multiplayer_authority():
 	call_deferred("add_child", player)
-		
+

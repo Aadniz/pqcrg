@@ -5,7 +5,7 @@ import os
 import glob
 import sys
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
 
 def analyze_pcap(file):
     packets = rdpcap(file)
@@ -15,33 +15,48 @@ def analyze_pcap(file):
     total_time = end_time - start_time
     return total_time * 1000
 
-# Get directory from command line arguments
-directory = sys.argv[1] if len(sys.argv) > 1 else '.'
-file_name = directory.split("/")[-1]
+# Get directories from command line arguments
+directories = sys.argv[1:] if len(sys.argv) > 1 else ['.']
 
-pcap_files = glob.glob(os.path.join(directory, '*.pcap'))
-total_times = []
+# Initialize lists to store total times for each directory
+total_times_list = []
+file_names = []
 
-for file in pcap_files:
-    total_time = analyze_pcap(file)
-    total_times.append(total_time)
+# Iterate over each directory
+for directory in directories:
+    file_name = directory.split("/")[-1]
+    file_names.append(file_name)
 
-min_time = min(total_times)
-max_time = max(total_times)
-avg_time = sum(total_times) / len(total_times)
+    pcap_files = glob.glob(os.path.join(directory, '*.pcap'))
+    total_times = []
 
-print(f'Min time: {min_time}')
-print(f'Max time: {max_time}')
-print(f'Average time: {avg_time}\n')
+    for file in pcap_files:
+        total_time = analyze_pcap(file)
+        total_times.append(total_time)
 
-# Create a histogram of the total times
-plt.hist(total_times, bins=50, alpha=0.5)
-sns.kdeplot(total_times, color='maroon');
+    total_times_list.append(total_times)
+
+# Desired bin width (in ms)
+bin_width = 0.02  # Change this to the desired bin width
+
+# Number of bins is the range of the data divided by the bin width
+bins = np.arange(min([min(times) for times in total_times_list]), max([max(times) for times in total_times_list]) + bin_width, bin_width)
+
+# Create a histogram of the total times for each directory
+for i in range(len(total_times_list)):
+    plt.hist(total_times_list[i], bins=bins, alpha=0.7, histtype='stepfilled', label=file_names[i])
+
 plt.subplots_adjust(left=0.075, right=0.99, top=0.95, bottom=0.09)
-plt.title(f'Distribution of Total Times for {file_name}')
+plt.title('Distribution of Total Times')
 plt.xlabel('Total Time (ms)')
 plt.ylabel('Frequency')
 
+# Set the start and end of the x-axis
+plt.xlim(0, 2.75)
+
+# Add a legend
+plt.legend(loc='upper right')
+
 # Save the figure as a PDF
-plt.savefig(f"{file_name}-python.svg")
-print(f"Saved distribution to {file_name}-python.svg")
+plt.savefig("comparison.svg")
+print("Saved distribution to comparison.svg")

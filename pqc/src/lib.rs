@@ -4,7 +4,7 @@ use oqs::*;
 use std::net::{IpAddr, Ipv4Addr};
 use std::{thread, time};
 
-mod client;
+//mod client;
 mod crypter;
 mod server;
 
@@ -44,8 +44,8 @@ impl Pqc {
         match ip.parse::<IpAddr>() {
             Ok(ip) => {
                 thread::spawn(move || {
-                    let mut client = client::Client::new();
-                    client.pass(ip, port);
+                    //let mut client = client::Client::new();
+                    //client.pass(ip, port);
                 });
             }
             Err(e) => {

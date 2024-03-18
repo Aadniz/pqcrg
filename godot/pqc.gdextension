@@ -5,8 +5,8 @@ compatibility_minimum = 4.1
 [libraries]
 linux.debug.x86_64 =     "res://../pqc/target/debug/libpqcrg.so"
 linux.release.x86_64 =   "res://../pqc/target/release/libpqcrg.so"
-windows.debug.x86_64 =   "res://../pqc/target/debug/libpqcrg.dll"
-windows.release.x86_64 = "res://../pqc/target/release/libpqcrg.dll"
+windows.debug.x86_64 =   "res://../pqc/target/debug/pqcrg.dll"
+windows.release.x86_64 = "res://../pqc/target/release/pqcrg.dll"
 macos.debug =            "res://../pqc/target/debug/libpqcrg.dylib"
 macos.release =          "res://../pqc/target/release/libpqcrg.dylib"
 macos.debug.arm64 =      "res://../pqc/target/debug/libpqcrg.dylib"

@@ -23,7 +23,7 @@ properties/1/path = NodePath(".:rotation")
 properties/1/spawn = true
 properties/1/replication_mode = 1
 
-[node name="VehicleBody3D" type="VehicleBody3D"]
+[node name="VehicleBody3D" type="VehicleBody3D" groups=["player"]]
 center_of_mass_mode = 1
 center_of_mass = Vector3(0.1, -0.1, 0)
 script = ExtResource("1_r3jdc")

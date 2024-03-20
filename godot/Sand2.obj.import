@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://d4dlbn6uq0gq1"
+path="res://.godot/imported/Sand2.obj-b9fc053f1cf2be5f1cc162e9156c3799.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Sand2.obj-b9fc053f1cf2be5f1cc162e9156c3799.mesh"]
+
+source_file="res://Sand2.obj"
+dest_files=["res://.godot/imported/Sand2.obj-b9fc053f1cf2be5f1cc162e9156c3799.mesh", "res://.godot/imported/Sand2.obj-b9fc053f1cf2be5f1cc162e9156c3799.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

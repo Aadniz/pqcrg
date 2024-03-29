@@ -119,4 +119,20 @@ shape = SubResource("ConvexPolygonShape3D_kgxbk")
 [node name="respawn_point" type="Node3D" parent="."]
 top_level = true
 
+[node name="Speedometer" type="Label" parent="."]
+visible = false
+anchors_preset = -1
+anchor_left = 0.941
+anchor_top = 0.926
+anchor_right = 0.941
+anchor_bottom = 0.926
+offset_left = -9.0321
+offset_top = -7.04803
+offset_right = 31.9679
+offset_bottom = 23.952
+grow_horizontal = 0
+grow_vertical = 0
+horizontal_alignment = 2
+vertical_alignment = 2
+
 [editable path="car2"]

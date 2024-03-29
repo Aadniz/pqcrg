@@ -2,6 +2,7 @@ extends VehicleBody3D
 
 @onready var camera_3d = $Node3D/SpringArm3D/Camera3D
 @onready var main = $"../"
+@onready var speedometer = $Speedometer
 
 
 const MAX_STEER = 0.8
@@ -14,6 +15,7 @@ var respawn_momentum = Vector3.ZERO
 func _ready():
 	#position += Vector3(RandomNumberGenerator.new().randf_range(-10.0, 10.0),0,0)
 	camera_3d.current = is_multiplayer_authority()
+	speedometer.show()
 
 func _enter_tree():
 	set_multiplayer_authority(name.to_int())
@@ -32,8 +34,8 @@ func _physics_process(delta):
 	engine_force = Input.get_axis("backward","forward") * ENGINE_POWER
 	var speed = get_linear_velocity()
 	var temp_speed = sqrt(speed.z*speed.z + speed.x*speed.x)
-	var speed_string = "Speed: %f" % temp_speed
-	#$CanvasLayer/speedometer.text = speed_string
+	var speed_string = "Speed: %d" % temp_speed
+	speedometer.text = speed_string
 
 func respawn():
 	rotation = respawn_rotation

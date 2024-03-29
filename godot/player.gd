@@ -1,6 +1,7 @@
 extends VehicleBody3D
 
 @onready var camera_3d = $Node3D/SpringArm3D/Camera3D
+@onready var main = $"../"
 
 
 const MAX_STEER = 0.8
@@ -19,7 +20,10 @@ func _enter_tree():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	if Input.is_action_just_pressed("respawn"):
+		respawn()
+	if Input.is_action_just_pressed("menu"):
+		main.pause_menu()
 
 func _physics_process(delta):
 	if !is_multiplayer_authority():
@@ -30,3 +34,8 @@ func _physics_process(delta):
 	var temp_speed = sqrt(speed.z*speed.z + speed.x*speed.x)
 	var speed_string = "Speed: %f" % temp_speed
 	#$CanvasLayer/speedometer.text = speed_string
+
+func respawn():
+	rotation = respawn_rotation
+	linear_velocity = respawn_momentum
+	position = $respawn_point.position

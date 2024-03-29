@@ -3,10 +3,11 @@ extends Node
 var peer = ENetMultiplayerPeer.new()
 @export var player_scene : PackedScene
 @onready var ui = $UI
+@onready var lobby = $Lobby
+@onready var pause = $Pause_Menu
 @onready var ip_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/IpTextEdit
 @onready var port_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/PortTextEdit
 @onready var pqc = Pqc.new()
-@onready var lobby = $Lobby
 
 const DEFAULT_PORT = 2522
 const DEFAULT_IP = "127.0.0.1"
@@ -54,9 +55,25 @@ func add_player(id=1):
 	player.name = str(id)
 	call_deferred("add_child", player)
 
+func exit_game(id):
+	multiplayer.peer_disconnected.connect(del_player)
+	del_player(id)
+
+func del_player(id):
+	rpc("_del_player", id)
+
+@rpc("any_peer","call_local") func _del_player(id):
+	get_node(str(id)).queue_free()
+
 func start_race():
 	lobby.hide()
 
 func quit_lobby():
 	ui.show()
 	lobby.hide()
+
+func pause_menu():
+	pause.show()
+
+func main_menu():
+	ui.show()

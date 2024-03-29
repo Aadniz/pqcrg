@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://ctfle2tc7lhmi"]
+[gd_scene load_steps=9 format=3 uid="uid://ctfle2tc7lhmi"]
 
 [ext_resource type="Script" path="res://game.gd" id="1_04fbu"]
 [ext_resource type="PackedScene" uid="uid://bo6i7751rdw7e" path="res://map1.tscn" id="1_jinpw"]
 [ext_resource type="PackedScene" uid="uid://dfrl4wb732b0t" path="res://player.tscn" id="2_3b7ii"]
 [ext_resource type="PackedScene" uid="uid://dkrrbax0ywmmg" path="res://lobby.tscn" id="4_hax7w"]
+[ext_resource type="PackedScene" uid="uid://m6w0lljlkhih" path="res://pause_menu.tscn" id="4_sfab5"]
 [ext_resource type="Script" path="res://menu.gd" id="4_wbwl5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t88ej"]
@@ -18,15 +19,11 @@ player_scene = ExtResource("2_3b7ii")
 
 [node name="Map" parent="." instance=ExtResource("1_jinpw")]
 
-[node name="Lobby" parent="." instance=ExtResource("4_hax7w")]
+[node name="Pause_Menu" parent="." instance=ExtResource("4_sfab5")]
 visible = false
 
-[node name="VBoxContainer2" parent="Lobby" index="1"]
-layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 498.0
-offset_bottom = 493.0
+[node name="Lobby" parent="." instance=ExtResource("4_hax7w")]
+visible = false
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
@@ -109,10 +106,8 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_ut22x")
 text = "Host"
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://player.tscn", "res://lobby_element.tscn")
+_spawnable_scenes = PackedStringArray("res://player.tscn")
 spawn_path = NodePath("..")
 
 [connection signal="pressed" from="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]
-
-[editable path="Lobby"]

@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dyo6w8nxejxps"
+path="res://.godot/imported/Lystcar.obj-30a71727ab1c90e30dfe03d8ff5a3f79.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Lystcar.obj-30a71727ab1c90e30dfe03d8ff5a3f79.mesh"]
+
+source_file="res://resources/Lystcar.obj"
+dest_files=["res://.godot/imported/Lystcar.obj-30a71727ab1c90e30dfe03d8ff5a3f79.mesh", "res://.godot/imported/Lystcar.obj-30a71727ab1c90e30dfe03d8ff5a3f79.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://drjo36pnay0kq"]
+[gd_scene load_steps=8 format=3 uid="uid://drjo36pnay0kq"]
 
 [ext_resource type="Script" path="res://game.gd" id="1_04fbu"]
 [ext_resource type="PackedScene" uid="uid://br5355bilf02q" path="res://map1.tscn" id="1_jinpw"]
 [ext_resource type="PackedScene" uid="uid://b6nicylmfjx7j" path="res://player.tscn" id="2_3b7ii"]
+[ext_resource type="PackedScene" uid="uid://7xyficrnwlfu" path="res://lobby.tscn" id="4_hax7w"]
 [ext_resource type="Script" path="res://menu.gd" id="4_wbwl5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t88ej"]
@@ -16,6 +17,9 @@ script = ExtResource("1_04fbu")
 player_scene = ExtResource("2_3b7ii")
 
 [node name="Map" parent="." instance=ExtResource("1_jinpw")]
+
+[node name="Lobby" parent="." instance=ExtResource("4_hax7w")]
+visible = false
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3

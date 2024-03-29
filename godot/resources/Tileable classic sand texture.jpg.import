@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b8jeyucnc7225"
-path.s3tc="res://.godot/imported/Tileable classic sand texture.jpg-5a42432a74430cde93f8bdd06248f420.s3tc.ctex"
+path.s3tc="res://.godot/imported/Tileable classic sand texture.jpg-ad53c658080332bef7b2058f463e8990.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Tileable classic sand texture.jpg"
-dest_files=["res://.godot/imported/Tileable classic sand texture.jpg-5a42432a74430cde93f8bdd06248f420.s3tc.ctex"]
+source_file="res://resources/Tileable classic sand texture.jpg"
+dest_files=["res://.godot/imported/Tileable classic sand texture.jpg-ad53c658080332bef7b2058f463e8990.s3tc.ctex"]
 
 [params]
 

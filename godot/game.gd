@@ -6,6 +6,7 @@ var peer = ENetMultiplayerPeer.new()
 @onready var ip_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/IpTextEdit
 @onready var port_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/PortTextEdit
 @onready var pqc = Pqc.new()
+@onready var lobby = $Lobby
 
 const DEFAULT_PORT = 2522
 const DEFAULT_IP = "127.0.0.1"
@@ -31,6 +32,7 @@ func _on_join_button_pressed():
 	peer.create_client(ip, int(port))
 	multiplayer.multiplayer_peer = peer
 	ui.hide()
+	lobby.show()
 
 
 func _on_host_button_pressed():
@@ -45,6 +47,7 @@ func _on_host_button_pressed():
 	# Spawn itself
 	add_player()
 	ui.hide()
+	lobby.show()
 
 func add_player(id=1):
 	var player = player_scene.instantiate()

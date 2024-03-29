@@ -1,15 +1,15 @@
 use super::crypter;
 use base64::{engine, Engine as _};
 use oqs::*;
-use std::error::Error;
-use std::io::{Read, Write};
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::result::Result;
-use std::sync::{Arc, Mutex};
-use std::thread;
 use std::{
     collections::HashMap,
+    error::Error,
+    io::{Read, Write},
+    net::{IpAddr, Ipv4Addr, SocketAddr},
     net::{TcpListener, TcpStream, UdpSocket},
+    result::Result,
+    sync::{Arc, Mutex},
+    thread,
 };
 
 type Connections = HashMap<IpAddr, kem::SharedSecret>;
@@ -19,8 +19,41 @@ pub struct Forwarder {
 }
 
 impl Forwarder {
-    pub fn new() -> Self {
+    pub fn new(destination: SocketAddr, shared_secret: kem::SharedSecret) -> Self {
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
+        let socket_clone = socket.try_clone().unwrap();
+
+        // Spawn a new thread to handle incoming data
+        thread::spawn(move || {
+            let mut buf = [0; 1024];
+            loop {
+                let (amt, src) = match socket_clone.recv_from(&mut buf) {
+                    Ok((amt, src)) => (amt, src),
+                    Err(e) => {
+                        eprintln!("Failed to receive data: {}", e);
+                        continue;
+                    }
+                };
+
+                println!("Forwarding {} to {}", src, destination);
+
+                let (mut nonce, ciphertext) =
+                    match crypter::encrypt(shared_secret.clone(), &buf[..amt].to_vec()) {
+                        Ok((nonce, ciphertext)) => (nonce, ciphertext),
+                        Err(e) => {
+                            eprintln!("Failed to encrypt data: {}", e);
+                            continue;
+                        }
+                    };
+                nonce.extend(ciphertext);
+
+                // Forward the received data to the destination
+                if let Err(e) = socket_clone.send_to(&nonce, destination) {
+                    eprintln!("Failed to send data: {}", e);
+                }
+            }
+        });
+
         Forwarder { socket }
     }
 
@@ -28,18 +61,13 @@ impl Forwarder {
         let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
         let addr = SocketAddr::new(ip, port);
         self.socket.send_to(&data, addr)?;
-
         Ok(())
     }
 }
 
 /// Starts the server and listens for incoming connections.
 pub fn listen(port: u16) {
-    println!(
-        "Server listening on TCP 127.0.0.1:{} and UDP 127.0.0.1:{}",
-        super::TCP_PORT,
-        super::UDP_PORT
-    );
+    println!("Server listening on 0.0.0.0:{}", super::BRIDGE_PORT);
 
     let connections: Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
     let connections_clone: Arc<Mutex<Connections>> = Arc::clone(&connections);
@@ -54,8 +82,8 @@ pub fn listen(port: u16) {
 ///
 /// * `connections` - A shared, mutable reference to the map of connections.
 fn listen_tcp(connections: Arc<Mutex<Connections>>) {
-    let tcp_listener = TcpListener::bind(format!("127.0.0.1:{}", super::TCP_PORT))
-        .expect(&format!("Could not bind port {}", super::TCP_PORT));
+    let tcp_listener = TcpListener::bind(format!("0.0.0.0:{}", super::BRIDGE_PORT))
+        .expect(&format!("Could not bind port {}", super::BRIDGE_PORT));
     for stream in tcp_listener.incoming() {
         match stream {
             Ok(stream) => {
@@ -75,15 +103,16 @@ fn listen_tcp(connections: Arc<Mutex<Connections>>) {
 ///
 /// * `connections` - A shared, mutable reference to the map of connections.
 fn listen_udp(connections: Arc<Mutex<Connections>>, port: u16) {
-    let udp_socket = match UdpSocket::bind(format!("127.0.0.1:{}", super::UDP_PORT)) {
+    let udp_socket = match UdpSocket::bind(format!("0.0.0.0:{}", super::BRIDGE_PORT)) {
         Ok(socket) => socket,
         Err(e) => {
-            eprintln!("Could not bind port {}: {}", super::UDP_PORT, e);
+            eprintln!("Could not bind port {}: {}", super::BRIDGE_PORT, e);
             return;
         }
     };
 
-    let mut forwarder = Forwarder::new();
+    let mut forwards: HashMap<u16, Forwarder> = HashMap::new();
+
     let mut buf = [0; 1024];
 
     loop {
@@ -105,6 +134,16 @@ fn listen_udp(connections: Arc<Mutex<Connections>>, port: u16) {
         };
 
         if let Some(shared_secret) = connections.get(&peer_addr.ip()) {
+            let peer_port = peer_addr.port();
+            let forwarder = match forwards.get_mut(&peer_port) {
+                Some(f) => f,
+                None => {
+                    let forwarder = Forwarder::new(peer_addr, shared_secret.clone());
+                    forwards.insert(peer_port, forwarder);
+                    forwards.get_mut(&peer_port).unwrap()
+                }
+            };
+
             let nonce = &buf[..12];
             let ciphertext = &buf[12..amt];
             match crypter::decrypt(shared_secret.clone(), nonce, ciphertext) {

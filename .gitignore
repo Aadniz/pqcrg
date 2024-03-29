@@ -15,3 +15,6 @@ data_*/
 mono_crash.*.json
 
 godot/export/
+
+# emacs sftp/ssh
+.dir-locals.el

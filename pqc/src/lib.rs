@@ -4,12 +4,11 @@ use oqs::*;
 use std::net::{IpAddr, Ipv4Addr};
 use std::{thread, time};
 
-//mod client;
+mod client;
 mod crypter;
 mod server;
 
-pub const TCP_PORT: u16 = 3522;
-pub const UDP_PORT: u16 = 3525;
+pub const BRIDGE_PORT: u16 = 3522;
 
 struct PqcExtension;
 
@@ -34,18 +33,18 @@ impl IRefCounted for Pqc {
 impl Pqc {
     #[func]
     fn start_host_bridge(&mut self, port: u16) {
-        godot_print!("Host bridge started on port {UDP_PORT}, forwarded to port {port}");
+        godot_print!("Host bridge started on port {BRIDGE_PORT}, forwarded to port {port}");
         thread::spawn(move || server::listen(port.clone()));
     }
 
     #[func]
     fn start_client_bridge(&mut self, ip: String, port: u16) {
-        godot_print!("Client bridge started on port {UDP_PORT}, forwarded to port {port}");
+        godot_print!("Client bridge started on port {BRIDGE_PORT}, forwarded to port {port}");
         match ip.parse::<IpAddr>() {
             Ok(ip) => {
                 thread::spawn(move || {
-                    //let mut client = client::Client::new();
-                    //client.pass(ip, port);
+                    let mut client = client::Client::new();
+                    client.pass(ip, port);
                 });
             }
             Err(e) => {

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://b6nicylmfjx7j"]
+[gd_scene load_steps=9 format=3 uid="uid://dfrl4wb732b0t"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_r3jdc"]
 [ext_resource type="PackedScene" uid="uid://diwi035a6wus5" path="res://resources/car.glb" id="2_mrcja"]

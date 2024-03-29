@@ -21,6 +21,7 @@ grow_vertical = 2
 color = Color(0.415686, 0.427451, 0.415686, 1)
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 0
 offset_left = 258.0
 offset_top = 61.0
 offset_right = 756.0
@@ -46,7 +47,6 @@ layout_mode = 2
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="VBoxContainer2/VBoxContainer"]
 _spawnable_scenes = PackedStringArray("res://lobby_element.tscn")
-spawn_path = NodePath("../../..")
 
 [connection signal="pressed" from="VBoxContainer2/HBoxContainer/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="VBoxContainer2/HBoxContainer/Quit" to="." method="_on_quit_pressed"]

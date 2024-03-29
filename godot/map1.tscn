@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://br5355bilf02q"]
+[gd_scene load_steps=15 format=3 uid="uid://bo6i7751rdw7e"]
 
 [ext_resource type="ArrayMesh" uid="uid://d4dlbn6uq0gq1" path="res://resources/Sand2.obj" id="2_i4ywd"]
 [ext_resource type="Texture2D" uid="uid://b8jeyucnc7225" path="res://resources/Tileable classic sand texture.jpg" id="2_uanrk"]

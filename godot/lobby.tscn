@@ -1,11 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://7xyficrnwlfu"]
+[gd_scene load_steps=2 format=3 uid="uid://dkrrbax0ywmmg"]
 
 [ext_resource type="Script" path="res://lobby.gd" id="1_mea37"]
 
-[node name="Lobby" type="CanvasLayer"]
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_mea37")
 
 [node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,8 +21,10 @@ grow_vertical = 2
 color = Color(0.415686, 0.427451, 0.415686, 1)
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]
-offset_right = 1154.0
-offset_bottom = 645.0
+offset_left = 258.0
+offset_top = 61.0
+offset_right = 756.0
+offset_bottom = 554.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2"]
 layout_mode = 2
@@ -37,7 +46,7 @@ layout_mode = 2
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="VBoxContainer2/VBoxContainer"]
 _spawnable_scenes = PackedStringArray("res://lobby_element.tscn")
-spawn_path = NodePath("../../../..")
+spawn_path = NodePath("../../..")
 
 [connection signal="pressed" from="VBoxContainer2/HBoxContainer/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="VBoxContainer2/HBoxContainer/Quit" to="." method="_on_quit_pressed"]

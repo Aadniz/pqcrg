@@ -54,3 +54,9 @@ func add_player(id=1):
 	player.name = str(id)
 	call_deferred("add_child", player)
 
+func start_race():
+	lobby.hide()
+
+func quit_lobby():
+	ui.show()
+	lobby.hide()

@@ -37,6 +37,10 @@ func _physics_process(delta):
 	var speed_string = "Speed: %d" % temp_speed
 	speedometer.text = speed_string
 
+func set_checkpoint(checkpoint_position, checkpoint_rotation):
+	$respawn_point.position = checkpoint_position
+	respawn_rotation = checkpoint_rotation
+	
 func respawn():
 	rotation = respawn_rotation
 	linear_velocity = respawn_momentum

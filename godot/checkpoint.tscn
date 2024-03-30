@@ -28,7 +28,7 @@ top_radius = 0.0
 height = 3.0
 
 [node name="Checkpoint" type="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 mesh = SubResource("TorusMesh_xax77")
 script = ExtResource("1_ti5id")
 
@@ -47,7 +47,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("CylinderMesh_k40uk")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, -1)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 1)
 mesh = SubResource("CylinderMesh_k40uk")
 skeleton = NodePath("../MeshInstance3D")
 

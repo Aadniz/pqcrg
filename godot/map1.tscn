@@ -103,7 +103,7 @@ spot_angle = 59.55
 spot_angle_attenuation = 1.46409
 
 [node name="Checkpoint" parent="Map/Props" instance=ExtResource("1_a6nyb")]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -3.97446, 6.21198)
+transform = Transform3D(-0.857167, 0.515038, 2.2513e-08, 0, -4.37114e-08, 1, 0.515038, 0.857167, 3.7468e-08, 0, -3.97446, 6.21198)
 
 [node name="Wall" type="MeshInstance3D" parent="Map"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2500, 0, 0)

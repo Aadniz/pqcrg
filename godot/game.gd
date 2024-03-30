@@ -1,5 +1,6 @@
 extends Node
 
+var player_list = []
 var peer = ENetMultiplayerPeer.new()
 @export var player_scene : PackedScene
 @onready var ui = $UI
@@ -53,10 +54,15 @@ func _on_host_button_pressed():
 func add_player(id=1):
 	var player = player_scene.instantiate()
 	player.name = str(id)
+	player_list += [player.name]
+	print(player_list)
 	call_deferred("add_child", player)
 
 func exit_game(id):
 	multiplayer.peer_disconnected.connect(del_player)
+	print(id)
+	player_list.erase(id)
+	print(player_list)
 	del_player(id)
 
 func del_player(id):

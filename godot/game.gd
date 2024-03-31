@@ -8,6 +8,7 @@ var peer = ENetMultiplayerPeer.new()
 @onready var pause = $Pause_Menu
 @onready var ip_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/IpTextEdit
 @onready var port_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/PortTextEdit
+@onready var pqc_toggle_checkbox = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2/CheckBox
 @onready var pqc = Pqc.new()
 
 const DEFAULT_PORT = 2522
@@ -44,8 +45,11 @@ func _on_join_button_pressed():
 		port = DEFAULT_PORT
 	if (ip == ""):
 		ip = DEFAULT_IP
-	pqc.start_client_bridge(ip, int(port))
-	peer.create_client("127.0.0.1", 3522)
+	if pqc_toggle_checkbox.pressed:
+		pqc.start_client_bridge(ip, int(port))
+		peer.create_client("127.0.0.1", 3522)
+	else:
+		peer.create_client("127.0.0.1", int(port))
 	multiplayer.multiplayer_peer = peer
 	ui.hide()
 	lobby.show()
@@ -63,7 +67,8 @@ func _on_host_button_pressed():
 
 
 func host_game(port: int):
-	pqc.start_host_bridge(port)
+	if pqc_toggle_checkbox.pressed:
+		pqc.start_host_bridge(port)
 	peer.create_server(port)
 	multiplayer.multiplayer_peer = peer
 	# physically spawn a player

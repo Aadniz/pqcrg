@@ -17,6 +17,7 @@ type Connections = HashMap<IpAddr, kem::SharedSecret>;
 
 /// The `Client` struct represents a client in a client-server model.
 pub struct Client {
+    source_addr: Arc<Mutex<Option<SocketAddr>>>,
     socket: UdpSocket,
     passer: UdpSocket,
     connections: Arc<Mutex<Connections>>,
@@ -27,55 +28,66 @@ impl Client {
     pub fn new() -> Client {
         // Binding to 0.0.0.0:0 means it is random
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
+        let socket2 = socket.try_clone().unwrap();
         let passer = UdpSocket::bind(format!("0.0.0.0:{}", super::BRIDGE_PORT)).unwrap();
+        let passer2 = passer.try_clone().unwrap();
         let connections: Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
-        //let connections_clone = Arc::clone(&connections);
-        //let socket_clone = socket.try_clone().unwrap();
+        let connections_clone = Arc::clone(&connections);
+        let source_addr: Arc<Mutex<Option<SocketAddr>>> = Arc::new(Mutex::new(None));
+        let source_addr_clone = Arc::clone(&source_addr);
 
-        //thread::spawn(move || {
-        //    let mut buf = [0; 1024];
-        //    let socket_clone = socket_clone.try_clone().unwrap();
-        //    loop {
-        //        let (amt, addr) = match socket_clone.recv_from(&mut buf) {
-        //            Ok((amt, addr)) => (amt, addr),
-        //            Err(e) => {
-        //                eprintln!("Failed to receive data: {}", e);
-        //                continue;
-        //            }
-        //        };
+        thread::spawn(move || {
+            let mut buf = [0; 1024];
+            loop {
+                let (amt, addr) = match socket2.recv_from(&mut buf) {
+                    Ok((amt, addr)) => (amt, addr),
+                    Err(e) => {
+                        eprintln!("Failed to receive data: {}", e);
+                        continue;
+                    }
+                };
 
-        //        let shared_secret = {
-        //            let connections_lock = connections_clone.lock().unwrap();
+                let shared_secret = {
+                    let connections_lock = connections_clone.lock().unwrap();
 
-        //            match connections_lock.get(&addr.ip()) {
-        //                Some(shared_secret) => shared_secret.clone(),
-        //                None => {
-        //                    eprintln!("No shared secret for peer: {}", &addr);
-        //                    continue;
-        //                }
-        //            }
-        //        };
+                    match connections_lock.get(&addr.ip()) {
+                        Some(shared_secret) => shared_secret.clone(),
+                        None => {
+                            eprintln!("No shared secret for peer: {}", &addr);
+                            continue;
+                        }
+                    }
+                };
 
-        //        let nonce = &buf[..12];
-        //        let ciphertext = &buf[12..amt];
-        //        match crypter::decrypt(shared_secret.clone(), nonce, ciphertext) {
-        //            Ok(data) => {
-        //                // Convert the bytes to a string
-        //                let data = match String::from_utf8(data.to_vec()) {
-        //                    Ok(data) => data,
-        //                    Err(e) => {
-        //                        eprintln!("Failed to convert data to string: {}", e);
-        //                        continue;
-        //                    }
-        //                };
-        //                println!("Got data {}", data);
-        //            }
-        //            Err(e) => eprintln!("Failed to decrypt data: {}", e),
-        //        }
-        //    }
-        //});
+                let nonce = &buf[..12];
+                let ciphertext = &buf[12..amt];
+                match crypter::decrypt(shared_secret.clone(), nonce, ciphertext) {
+                    Ok(data) => {
+                        // Convert the bytes to a string
+                        let data = match String::from_utf8(data.to_vec()) {
+                            Ok(data) => data,
+                            Err(e) => {
+                                eprintln!("Failed to convert data to string: {}", e);
+                                continue;
+                            }
+                        };
+
+                        // Forward the received data to the destination
+                        let addr: &Option<SocketAddr> =
+                            { &source_addr_clone.lock().unwrap().clone() };
+                        if let Some(addr) = addr {
+                            if let Err(e) = passer2.send_to(&data.as_bytes(), addr) {
+                                eprintln!("Failed to send data: {}", e);
+                            }
+                        }
+                    }
+                    Err(e) => eprintln!("Failed to decrypt data: {}", e),
+                }
+            }
+        });
 
         Client {
+            source_addr,
             socket,
             passer,
             connections,
@@ -94,12 +106,18 @@ impl Client {
                 }
             };
 
-            println!("here");
+            {
+                let mut source_addr = self.source_addr.lock().unwrap();
+                if source_addr.is_none() {
+                    if peer_addr.port() != 0 {
+                        *source_addr = Some(peer_addr);
+                    }
+                }
+            }
 
             // Foorwards the data
-            match self.send(ip, buf[..amt].to_vec()) {
-                Ok(_) => (),
-                Err(e) => eprintln!("{e}"),
+            if let Err(e) = self.send(ip, buf[..amt].to_vec()) {
+                eprintln!("{e}");
             };
         }
     }

@@ -19,23 +19,25 @@ pub struct Forwarder {
 }
 
 impl Forwarder {
-    pub fn new(destination: SocketAddr, shared_secret: kem::SharedSecret) -> Self {
+    pub fn new(
+        destination: SocketAddr,
+        shared_secret: kem::SharedSecret,
+        socket_clone: UdpSocket,
+    ) -> Self {
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
-        let socket_clone = socket.try_clone().unwrap();
+        let socket2 = socket.try_clone().unwrap();
 
         // Spawn a new thread to handle incoming data
         thread::spawn(move || {
             let mut buf = [0; 1024];
             loop {
-                let (amt, src) = match socket_clone.recv_from(&mut buf) {
+                let (amt, src) = match socket2.recv_from(&mut buf) {
                     Ok((amt, src)) => (amt, src),
                     Err(e) => {
                         eprintln!("Failed to receive data: {}", e);
                         continue;
                     }
                 };
-
-                println!("Forwarding {} to {}", src, destination);
 
                 let (mut nonce, ciphertext) =
                     match crypter::encrypt(shared_secret.clone(), &buf[..amt].to_vec()) {
@@ -73,6 +75,7 @@ pub fn listen(port: u16) {
     let connections_clone: Arc<Mutex<Connections>> = Arc::clone(&connections);
 
     thread::spawn(move || listen_tcp(connections_clone));
+
     listen_udp(connections, port);
 }
 
@@ -138,7 +141,14 @@ fn listen_udp(connections: Arc<Mutex<Connections>>, port: u16) {
             let forwarder = match forwards.get_mut(&peer_port) {
                 Some(f) => f,
                 None => {
-                    let forwarder = Forwarder::new(peer_addr, shared_secret.clone());
+                    let socket_clone = match udp_socket.try_clone() {
+                        Ok(s) => s,
+                        Err(e) => {
+                            eprintln!("Failed to clone socket: {}", e);
+                            continue;
+                        }
+                    };
+                    let forwarder = Forwarder::new(peer_addr, shared_secret.clone(), socket_clone);
                     forwards.insert(peer_port, forwarder);
                     forwards.get_mut(&peer_port).unwrap()
                 }

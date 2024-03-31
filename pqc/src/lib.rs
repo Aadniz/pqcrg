@@ -1,15 +1,12 @@
-use clap::Parser;
 use godot::prelude::*;
-use oqs::*;
-use std::net::{IpAddr, Ipv4Addr};
-use std::{thread, time};
+use std::net::IpAddr;
+use std::thread;
 
-//mod client;
+mod client;
 mod crypter;
 mod server;
 
-pub const TCP_PORT: u16 = 3522;
-pub const UDP_PORT: u16 = 3525;
+pub const BRIDGE_PORT: u16 = 3522;
 
 struct PqcExtension;
 
@@ -22,10 +19,7 @@ struct Pqc {
 }
 #[godot_api]
 impl IRefCounted for Pqc {
-    // TODO: Moving the contents of start_sim here causes problems but it would mean we
-    // could get rid of all the Option
     fn init(base: Base<RefCounted>) -> Self {
-        // We don't have any channels until the sim is started
         Self { base }
     }
 }
@@ -34,18 +28,22 @@ impl IRefCounted for Pqc {
 impl Pqc {
     #[func]
     fn start_host_bridge(&mut self, port: u16) {
-        godot_print!("Host bridge started on port {UDP_PORT}, forwarded to port {port}");
+        godot_print!(
+            "Host bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port 127.0.0.1:{port}"
+        );
         thread::spawn(move || server::listen(port.clone()));
     }
 
     #[func]
     fn start_client_bridge(&mut self, ip: String, port: u16) {
-        godot_print!("Client bridge started on port {UDP_PORT}, forwarded to port {port}");
+        godot_print!(
+            "Client bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port {ip}:{port}"
+        );
         match ip.parse::<IpAddr>() {
             Ok(ip) => {
                 thread::spawn(move || {
-                    //let mut client = client::Client::new();
-                    //client.pass(ip, port);
+                    let mut client = client::Client::new();
+                    client.pass(ip, port);
                 });
             }
             Err(e) => {

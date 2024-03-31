@@ -8,15 +8,19 @@ use std::{
     net::{IpAddr, SocketAddr, TcpStream, UdpSocket},
     result::Result,
     sync::{Arc, Mutex},
+    thread,
 };
 
-use oqs::{kem::SharedSecret, *};
+use oqs::*;
+
+type Connections = HashMap<IpAddr, kem::SharedSecret>;
 
 /// The `Client` struct represents a client in a client-server model.
 pub struct Client {
+    source_addr: Arc<Mutex<Option<SocketAddr>>>,
     socket: UdpSocket,
-    passer: Option<UdpSocket>,
-    connections: Arc<Mutex<HashMap<IpAddr, kem::SharedSecret>>>,
+    passer: UdpSocket,
+    connections: Arc<Mutex<Connections>>,
 }
 
 impl Client {
@@ -24,32 +28,78 @@ impl Client {
     pub fn new() -> Client {
         // Binding to 0.0.0.0:0 means it is random
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
+        let socket2 = socket.try_clone().unwrap();
+        let passer = UdpSocket::bind(format!("0.0.0.0:{}", super::BRIDGE_PORT)).unwrap();
+        let passer2 = passer.try_clone().unwrap();
+        let connections: Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
+        let connections_clone = Arc::clone(&connections);
+        let source_addr: Arc<Mutex<Option<SocketAddr>>> = Arc::new(Mutex::new(None));
+        let source_addr_clone = Arc::clone(&source_addr);
+
+        thread::spawn(move || {
+            let mut buf = [0; 1024];
+            loop {
+                let (amt, addr) = match socket2.recv_from(&mut buf) {
+                    Ok((amt, addr)) => (amt, addr),
+                    Err(e) => {
+                        eprintln!("Failed to receive data: {}", e);
+                        continue;
+                    }
+                };
+
+                let shared_secret = {
+                    let connections_lock = connections_clone.lock().unwrap();
+
+                    match connections_lock.get(&addr.ip()) {
+                        Some(shared_secret) => shared_secret.clone(),
+                        None => {
+                            eprintln!("No shared secret for peer: {}", &addr);
+                            continue;
+                        }
+                    }
+                };
+
+                let nonce = &buf[..12];
+                let ciphertext = &buf[12..amt];
+                match crypter::decrypt(shared_secret.clone(), nonce, ciphertext) {
+                    Ok(data) => {
+                        // Convert the bytes to a string
+                        //let data = match String::from_utf8(data.to_vec()) {
+                        //    Ok(data) => data,
+                        //    Err(e) => {
+                        //        eprintln!("Failed to convert data to string: {}", e);
+                        //        continue;
+                        //    }
+                        //};
+
+                        // Forward the received data to the destination
+                        let addr: &Option<SocketAddr> =
+                            { &source_addr_clone.lock().unwrap().clone() };
+                        if let Some(addr) = addr {
+                            if let Err(e) = passer2.send_to(&data, addr) {
+                                eprintln!("Failed to send data: {}", e);
+                            }
+                        }
+                    }
+                    Err(e) => eprintln!("Failed to decrypt data: {}", e),
+                }
+            }
+        });
+
         Client {
+            source_addr,
             socket,
-            passer: None,
-            connections: Arc::new(Mutex::new(HashMap::new())),
+            passer,
+            connections,
         }
     }
 
     pub fn pass(&mut self, ip: IpAddr, port: u16) {
-        if !self.passer.is_none() {
-            eprint!("Passer already set!");
-            return;
-        }
-
-        let udp_socket = match UdpSocket::bind(format!("127.0.0.1:{}", super::UDP_PORT)) {
-            Ok(socket) => socket,
-            Err(e) => {
-                eprintln!("Could not bind port {}: {}", super::UDP_PORT, e);
-                return;
-            }
-        };
-
-        self.passer = Some(udp_socket);
+        let addr = SocketAddr::new(ip, port);
         let mut buf = [0; 1024];
 
         loop {
-            let (amt, peer_addr) = match self.passer.as_ref().unwrap().recv_from(&mut buf) {
+            let (amt, peer_addr) = match self.passer.recv_from(&mut buf) {
                 Ok((amt, addr)) => (amt, addr),
                 Err(e) => {
                     eprintln!("Failed to receive from UDP socket: {}", e);
@@ -57,10 +107,18 @@ impl Client {
                 }
             };
 
+            {
+                let mut source_addr = self.source_addr.lock().unwrap();
+                if source_addr.is_none() {
+                    if peer_addr.port() != 0 {
+                        *source_addr = Some(peer_addr);
+                    }
+                }
+            }
+
             // Foorwards the data
-            match self.send(ip, buf[..amt].to_vec()) {
-                Ok(_) => (),
-                Err(e) => eprintln!("{e}"),
+            if let Err(e) = self.send(addr, buf[..amt].to_vec()) {
+                eprintln!("{e}");
             };
         }
     }
@@ -75,20 +133,26 @@ impl Client {
     /// # Errors
     ///
     /// Returns an error if the message cannot be sent.
-    fn send(&mut self, ip: IpAddr, msg: Vec<u8>) -> Result<(), Box<dyn Error + '_>> {
-        let addr = SocketAddr::new(ip, super::UDP_PORT);
-        let connections = Arc::clone(&self.connections);
-        let shared_secret = match { connections.lock()? }.get(&ip) {
-            Some(shared_secret) => shared_secret.clone(),
-            None => self.handshake(ip)?.clone(),
-        };
+    fn send(&mut self, addr: SocketAddr, msg: Vec<u8>) -> Result<(), Box<dyn Error + '_>> {
+        let mut shared_secret = None;
 
-        let shared_secret = shared_secret.clone();
-        let (nonce, ciphertext) = crypter::encrypt(shared_secret, &msg)
+        {
+            let connections_lock = self.connections.lock().unwrap();
+            if let Some(secret) = connections_lock.get(&addr.ip()) {
+                shared_secret = Some(secret.clone());
+            }
+        }
+
+        if shared_secret.is_none() {
+            shared_secret = Some(self.handshake(addr.ip())?);
+        }
+
+        let shared_secret = shared_secret.unwrap();
+
+        let (mut nonce, ciphertext) = crypter::encrypt(shared_secret.clone(), &msg)
             .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error.to_string()))?;
-        let mut data = nonce;
-        data.extend(ciphertext);
-        self.socket.send_to(&data, addr)?;
+        nonce.extend(ciphertext);
+        self.socket.send_to(&nonce, addr)?;
 
         Ok(())
     }
@@ -102,8 +166,8 @@ impl Client {
     /// # Errors
     ///
     /// Returns an error if the handshake cannot be performed.
-    fn handshake(&mut self, ip: IpAddr) -> Result<SharedSecret, Box<dyn Error>> {
-        let addr = SocketAddr::new(ip, super::TCP_PORT);
+    fn handshake(&mut self, ip: IpAddr) -> Result<kem::SharedSecret, Box<dyn Error>> {
+        let addr = SocketAddr::new(ip, super::BRIDGE_PORT);
         println!("New connection to {}, exchanging keys", addr);
 
         let kemalg = kem::Kem::new(kem::Algorithm::Kyber768).map_err(to_io_error)?;
@@ -125,9 +189,7 @@ impl Client {
 
         let kem_ss = kemalg.decapsulate(&kem_sk, &kem_ct).map_err(to_io_error)?;
         {
-            let connetions: Arc<Mutex<HashMap<IpAddr, kem::SharedSecret>>> =
-                Arc::clone(self.connections);
-            connections.lock()?.insert(ip, kem_ss.clone());
+            self.connections.lock().unwrap().insert(ip, kem_ss.clone());
         }
 
         println!("Shared key is: {}", base64_vec(&kem_ss.clone().into_vec()));

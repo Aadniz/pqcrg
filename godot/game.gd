@@ -45,11 +45,11 @@ func _on_join_button_pressed():
 		port = DEFAULT_PORT
 	if (ip == ""):
 		ip = DEFAULT_IP
-	if pqc_toggle_checkbox.pressed:
+	if pqc_toggle_checkbox.button_pressed == true:
 		pqc.start_client_bridge(ip, int(port))
 		peer.create_client("127.0.0.1", 3522)
 	else:
-		peer.create_client("127.0.0.1", int(port))
+		peer.create_client(ip, int(port))
 	multiplayer.multiplayer_peer = peer
 	ui.hide()
 	lobby.show()
@@ -67,7 +67,7 @@ func _on_host_button_pressed():
 
 
 func host_game(port: int):
-	if pqc_toggle_checkbox.pressed:
+	if pqc_toggle_checkbox.button_pressed == true:
 		pqc.start_host_bridge(port)
 	peer.create_server(port)
 	multiplayer.multiplayer_peer = peer

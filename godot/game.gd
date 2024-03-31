@@ -42,7 +42,7 @@ func _on_join_button_pressed():
 	if (ip == ""):
 		ip = DEFAULT_IP
 	pqc.start_client_bridge(ip, int(port))
-	peer.create_client("127.0.0.1", 3525)
+	peer.create_client("127.0.0.1", 3522)
 	multiplayer.multiplayer_peer = peer
 	ui.hide()
 

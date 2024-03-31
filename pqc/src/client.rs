@@ -64,19 +64,19 @@ impl Client {
                 match crypter::decrypt(shared_secret.clone(), nonce, ciphertext) {
                     Ok(data) => {
                         // Convert the bytes to a string
-                        let data = match String::from_utf8(data.to_vec()) {
-                            Ok(data) => data,
-                            Err(e) => {
-                                eprintln!("Failed to convert data to string: {}", e);
-                                continue;
-                            }
-                        };
+                        //let data = match String::from_utf8(data.to_vec()) {
+                        //    Ok(data) => data,
+                        //    Err(e) => {
+                        //        eprintln!("Failed to convert data to string: {}", e);
+                        //        continue;
+                        //    }
+                        //};
 
                         // Forward the received data to the destination
                         let addr: &Option<SocketAddr> =
                             { &source_addr_clone.lock().unwrap().clone() };
                         if let Some(addr) = addr {
-                            if let Err(e) = passer2.send_to(&data.as_bytes(), addr) {
+                            if let Err(e) = passer2.send_to(&data, addr) {
                                 eprintln!("Failed to send data: {}", e);
                             }
                         }

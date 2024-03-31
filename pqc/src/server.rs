@@ -31,7 +31,7 @@ impl Forwarder {
         thread::spawn(move || {
             let mut buf = [0; 1024];
             loop {
-                let (amt, src) = match socket2.recv_from(&mut buf) {
+                let (amt, _src) = match socket2.recv_from(&mut buf) {
                     Ok((amt, src)) => (amt, src),
                     Err(e) => {
                         eprintln!("Failed to receive data: {}", e);

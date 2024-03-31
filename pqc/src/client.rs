@@ -95,6 +95,7 @@ impl Client {
     }
 
     pub fn pass(&mut self, ip: IpAddr, port: u16) {
+        let addr = SocketAddr::new(ip, port);
         let mut buf = [0; 1024];
 
         loop {
@@ -116,7 +117,7 @@ impl Client {
             }
 
             // Foorwards the data
-            if let Err(e) = self.send(ip, buf[..amt].to_vec()) {
+            if let Err(e) = self.send(addr, buf[..amt].to_vec()) {
                 eprintln!("{e}");
             };
         }
@@ -132,19 +133,18 @@ impl Client {
     /// # Errors
     ///
     /// Returns an error if the message cannot be sent.
-    fn send(&mut self, ip: IpAddr, msg: Vec<u8>) -> Result<(), Box<dyn Error + '_>> {
-        let addr = SocketAddr::new(ip, super::BRIDGE_PORT);
+    fn send(&mut self, addr: SocketAddr, msg: Vec<u8>) -> Result<(), Box<dyn Error + '_>> {
         let mut shared_secret = None;
 
         {
             let connections_lock = self.connections.lock().unwrap();
-            if let Some(secret) = connections_lock.get(&ip) {
+            if let Some(secret) = connections_lock.get(&addr.ip()) {
                 shared_secret = Some(secret.clone());
             }
         }
 
         if shared_secret.is_none() {
-            shared_secret = Some(self.handshake(ip)?);
+            shared_secret = Some(self.handshake(addr.ip())?);
         }
 
         let shared_secret = shared_secret.unwrap();

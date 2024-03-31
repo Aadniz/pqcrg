@@ -42,7 +42,7 @@ $ python3 main.py server --port 2522
 
 The port `2522` means it will listen on port 2522. Data from the bridge will enter this port.
 
-4. Rum the client application.
+4. Run the client application.
 
 Now that we have the 2 bridges set up, and the host application ready, we can connect the client application.
 

@@ -3,7 +3,7 @@ extends VehicleBody3D
 @onready var camera_3d = $Node3D/SpringArm3D/Camera3D
 @onready var main = $"../"
 @onready var speedometer = $Speedometer
-
+@onready var pause_menu = $Control
 
 const MAX_STEER = 0.8
 const ENGINE_POWER = 300
@@ -16,6 +16,7 @@ func _ready():
 	#position += Vector3(RandomNumberGenerator.new().randf_range(-10.0, 10.0),0,0)
 	camera_3d.current = is_multiplayer_authority()
 	speedometer.show()
+	
 
 func _enter_tree():
 	set_multiplayer_authority(name.to_int())
@@ -25,7 +26,7 @@ func _process(delta):
 	if Input.is_action_just_pressed("respawn"):
 		respawn()
 	if Input.is_action_just_pressed("menu"):
-		main.pause_menu()
+		pause()
 
 func _physics_process(delta):
 	if !is_multiplayer_authority():
@@ -45,3 +46,28 @@ func respawn():
 	rotation = respawn_rotation
 	linear_velocity = respawn_momentum
 	position = $respawn_point.position
+
+func pause():
+	if paused:
+		pause_menu.hide()
+	else:
+		pause_menu.show()
+	paused = !paused
+
+func _on_resume_pressed():
+	pause_menu.hide()
+	paused = !paused
+
+func _on_main_menu_pressed():
+	main.main_menu()
+	pause_menu.hide()
+
+
+func _on_quit_pressed():
+	main.exit_game(name.to_int())
+	quit_game()
+
+func quit_game():
+	get_tree().quit()
+
+

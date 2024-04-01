@@ -13,7 +13,7 @@ var peer = ENetMultiplayerPeer.new()
 
 const DEFAULT_PORT = 2522
 const DEFAULT_PQC_PORT = 3522
-const DEFAULT_IP = "192.168.111.202"
+const DEFAULT_IP = "127.0.0.1"
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -62,10 +62,7 @@ func _on_join_button_pressed():
 func _on_host_button_pressed():
 	var port = port_text_edit.get_line(0)
 	if (port == ""):
-		if pqc_toggle_checkbox.button_pressed == true:
-			port = DEFAULT_PQC_PORT
-		else:
-			port = DEFAULT_PORT
+		port = DEFAULT_PORT
 	host_game(int(port))
 	# Spawn itself
 	add_player()
@@ -85,15 +82,15 @@ func host_game(port: int):
 func add_player(id=1):
 	var player = player_scene.instantiate()
 	player.name = str(id)
-	player_list += [player.name]
+	player_list.append(player.name.to_int())
 	print(player_list)
 	call_deferred("add_child", player)
 
 func exit_game(id):
 	multiplayer.peer_disconnected.connect(del_player)
-	print(id)
-	player_list.erase(id)
-	print(player_list)
+	var temp_string = "\"%s\"" % id
+	print(temp_string)
+	
 	del_player(id)
 
 func del_player(id):
@@ -101,6 +98,8 @@ func del_player(id):
 
 @rpc("any_peer","call_local") func _del_player(id):
 	get_node(str(id)).queue_free()
+	player_list.erase(id)
+	print(player_list)
 
 func start_race():
 	lobby.hide()
@@ -108,9 +107,6 @@ func start_race():
 func quit_lobby():
 	ui.show()
 	lobby.hide()
-
-func pause_menu():
-	pause.show()
 
 func main_menu():
 	ui.show()

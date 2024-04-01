@@ -12,6 +12,7 @@ var peer = ENetMultiplayerPeer.new()
 @onready var pqc = Pqc.new()
 
 const DEFAULT_PORT = 2522
+const DEFAULT_PQC_PORT = 3522
 const DEFAULT_IP = "192.168.111.202"
 
 # Called when the node enters the scene tree for the first time.
@@ -42,7 +43,10 @@ func _on_join_button_pressed():
 	var ip = ip_text_edit.get_line(0)
 	var port = port_text_edit.get_line(0)
 	if (port == ""):
-		port = DEFAULT_PORT
+		if pqc_toggle_checkbox.button_pressed == true:
+			port = DEFAULT_PQC_PORT
+		else:
+			port = DEFAULT_PORT
 	if (ip == ""):
 		ip = DEFAULT_IP
 	if pqc_toggle_checkbox.button_pressed == true:
@@ -107,3 +111,10 @@ func pause_menu():
 
 func main_menu():
 	ui.show()
+
+
+func _on_check_box_toggled(toggled_on):
+	if toggled_on:
+		port_text_edit.placeholder_text = str(DEFAULT_PQC_PORT)
+	else:
+		port_text_edit.placeholder_text = str(DEFAULT_PORT)

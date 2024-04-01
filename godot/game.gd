@@ -125,8 +125,11 @@ func show_quit():
 
 	
 func disconnect_2(id):
+	print(peer.get_connection_status())
 	rpc("_del_player", id)
+	print(peer.get_connection_status())
 
 @rpc("any_peer","call_local") func _disconnect_2(id):
-	multiplayer.disconnect_peer(id)
+		multiplayer.disconnect_peer(id)
 	
+

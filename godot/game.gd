@@ -54,6 +54,7 @@ func _on_join_button_pressed():
 	else:
 		peer.create_client(ip, int(port))
 	multiplayer.multiplayer_peer = peer
+	print(peer)
 	ui.hide()
 	lobby.show()
 
@@ -113,3 +114,19 @@ func _on_check_box_toggled(toggled_on):
 		port_text_edit.placeholder_text = str(DEFAULT_PQC_PORT)
 	else:
 		port_text_edit.placeholder_text = str(DEFAULT_PORT)
+
+
+func _on_actually_quit_pressed():
+	get_tree().quit()
+
+func show_quit():
+	$actually_quit.show()
+	
+
+	
+func disconnect_2(id):
+	rpc("_del_player", id)
+
+@rpc("any_peer","call_local") func _disconnect_2(id):
+	multiplayer.disconnect_peer(id)
+	

@@ -61,12 +61,10 @@ func _on_resume_pressed():
 func _on_main_menu_pressed():
 	main.main_menu()
 	pause_menu.hide()
+	main.disconnect_2(name.to_int())
+	multiplayer.close()
 
 
 func _on_quit_pressed():
 	main.exit_game(name.to_int())
-
-func quit_game():
-	get_tree().quit()
-
-
+	main.show_quit()

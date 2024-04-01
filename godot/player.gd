@@ -65,7 +65,6 @@ func _on_main_menu_pressed():
 
 func _on_quit_pressed():
 	main.exit_game(name.to_int())
-	quit_game()
 
 func quit_game():
 	get_tree().quit()

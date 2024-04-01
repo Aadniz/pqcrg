@@ -5,7 +5,6 @@ var peer = ENetMultiplayerPeer.new()
 @export var player_scene : PackedScene
 @onready var ui = $UI
 @onready var lobby = $Lobby
-@onready var pause = $Pause_Menu
 @onready var ip_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/IpTextEdit
 @onready var port_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/PortTextEdit
 @onready var pqc_toggle_checkbox = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2/CheckBox
@@ -88,9 +87,6 @@ func add_player(id=1):
 
 func exit_game(id):
 	multiplayer.peer_disconnected.connect(del_player)
-	var temp_string = "\"%s\"" % id
-	print(temp_string)
-	
 	del_player(id)
 
 func del_player(id):

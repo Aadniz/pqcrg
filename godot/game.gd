@@ -127,6 +127,8 @@ func show_quit():
 func disconnect_2(id):
 	print(peer.get_connection_status())
 	rpc("_del_player", id)
+	OS.delay_msec(1000)
+	peer.close()
 	print(peer.get_connection_status())
 
 @rpc("any_peer","call_local") func _disconnect_2(id):

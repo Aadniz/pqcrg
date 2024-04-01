@@ -8,3 +8,4 @@ func _on_start_pressed():
 
 func _on_quit_pressed():
 	main.quit_lobby()
+	main.exit_game()

@@ -37,6 +37,7 @@ func _physics_process(delta):
 	var temp_speed = sqrt(speed.z*speed.z + speed.x*speed.x)
 	var speed_string = "Speed: %d" % temp_speed
 	speedometer.text = speed_string
+	camera_3d.fov = lerp(camera_3d.fov, 80 + sqrt(temp_speed/100) * 60, 0.1)
 
 func set_checkpoint(checkpoint_position, checkpoint_rotation):
 	$respawn_point.position = checkpoint_position
@@ -61,9 +62,10 @@ func _on_resume_pressed():
 func _on_main_menu_pressed():
 	main.main_menu()
 	pause_menu.hide()
-	main.disconnect_2(name.to_int())
+	main.exit_game()
 
 
 func _on_quit_pressed():
-	main.exit_game(name.to_int())
-	main.show_quit()
+	main.exit_game()
+	OS.delay_msec(100)
+	get_tree().quit()

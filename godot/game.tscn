@@ -21,30 +21,6 @@ player_scene = ExtResource("2_3b7ii")
 [node name="Lobby" parent="." instance=ExtResource("4_hax7w")]
 visible = false
 
-[node name="peer" type="Button" parent="."]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -50.5
-offset_top = -31.0
-offset_right = 50.5
-grow_horizontal = 2
-grow_vertical = 0
-text = "peer button"
-
-[node name="actually_quit" type="Button" parent="."]
-visible = false
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -52.0
-offset_right = 52.0
-offset_bottom = 31.0
-grow_horizontal = 2
-text = "actually quit"
-
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
@@ -145,8 +121,6 @@ text = "Host"
 _spawnable_scenes = PackedStringArray("res://player.tscn")
 spawn_path = NodePath("..")
 
-[connection signal="pressed" from="peer" to="." method="_on_peer_pressed"]
-[connection signal="pressed" from="actually_quit" to="." method="_on_actually_quit_pressed"]
 [connection signal="toggled" from="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2/CheckBox" to="." method="_on_check_box_toggled"]
 [connection signal="pressed" from="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
 [connection signal="pressed" from="UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]

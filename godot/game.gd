@@ -54,7 +54,6 @@ func _on_join_button_pressed():
 	else:
 		peer.create_client(ip, int(port))
 	multiplayer.multiplayer_peer = peer
-	print(peer)
 	ui.hide()
 	lobby.show()
 
@@ -86,15 +85,16 @@ func add_player(id=1):
 	print(player_list)
 	call_deferred("add_child", player)
 
-func exit_game(id):
-	multiplayer.peer_disconnected.connect(del_player)
-	del_player(id)
+func exit_game():
+	del_player(peer.get_unique_id())
 
 func del_player(id):
+	rpc("_disconnect_2", id)
 	rpc("_del_player", id)
 
 @rpc("any_peer","call_local") func _del_player(id):
 	get_node(str(id)).queue_free()
+	multiplayer.disconnect_peer(id)
 	player_list.erase(id)
 	print(player_list)
 
@@ -114,24 +114,3 @@ func _on_check_box_toggled(toggled_on):
 		port_text_edit.placeholder_text = str(DEFAULT_PQC_PORT)
 	else:
 		port_text_edit.placeholder_text = str(DEFAULT_PORT)
-
-
-func _on_actually_quit_pressed():
-	get_tree().quit()
-
-func show_quit():
-	$actually_quit.show()
-	
-
-	
-func disconnect_2(id):
-	print(peer.get_connection_status())
-	rpc("_del_player", id)
-	OS.delay_msec(1000)
-	peer.close()
-	print(peer.get_connection_status())
-
-@rpc("any_peer","call_local") func _disconnect_2(id):
-		multiplayer.disconnect_peer(id)
-	
-

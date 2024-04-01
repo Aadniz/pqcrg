@@ -1,5 +1,6 @@
 extends Control
-@onready var main = $"../"
+@onready var main = $"../../"
+@onready var player = $"../"
 @onready var pause_menu = $"."
 
 func _process(delta):
@@ -12,7 +13,7 @@ func _on_main_menu_pressed():
 
 
 func _on_quit_pressed():
-	main.exit_game(get_multiplayer_authority())
+	main.exit_game(player.name.to_int())
 	get_tree().quit()
 
 

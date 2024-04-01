@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://b6nicylmfjx7j"]
+[gd_scene load_steps=10 format=3 uid="uid://b6nicylmfjx7j"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_r3jdc"]
 [ext_resource type="PackedScene" uid="uid://diwi035a6wus5" path="res://resources/car.glb" id="2_mrcja"]
 [ext_resource type="ArrayMesh" uid="uid://dyo6w8nxejxps" path="res://resources/Lystcar.obj" id="3_csjbq"]
+[ext_resource type="PackedScene" uid="uid://m6w0lljlkhih" path="res://pause_menu.tscn" id="4_tmr6d"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_an80k"]
 albedo_color = Color(0.152941, 0.152941, 0.152941, 1)
@@ -134,5 +135,7 @@ grow_horizontal = 0
 grow_vertical = 0
 horizontal_alignment = 2
 vertical_alignment = 2
+
+[node name="Pause_Menu" parent="." instance=ExtResource("4_tmr6d")]
 
 [editable path="car2"]

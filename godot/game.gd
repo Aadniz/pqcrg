@@ -62,7 +62,10 @@ func _on_join_button_pressed():
 func _on_host_button_pressed():
 	var port = port_text_edit.get_line(0)
 	if (port == ""):
-		port = DEFAULT_PORT
+		if pqc_toggle_checkbox.button_pressed == true:
+			port = DEFAULT_PQC_PORT
+		else:
+			port = DEFAULT_PORT
 	host_game(int(port))
 	# Spawn itself
 	add_player()

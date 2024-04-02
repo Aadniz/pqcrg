@@ -114,3 +114,9 @@ func _on_check_box_toggled(toggled_on):
 		port_text_edit.placeholder_text = str(DEFAULT_PQC_PORT)
 	else:
 		port_text_edit.placeholder_text = str(DEFAULT_PORT)
+		
+func add_checkpoint(id):
+	print("checkpoint added %d" % id)
+
+func activate_checkpoint(checkpoint, player):
+	print("car %d" % player + "drove though checkpoint %d" %  checkpoint)

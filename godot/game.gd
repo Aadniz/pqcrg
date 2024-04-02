@@ -126,3 +126,14 @@ func activate_checkpoint(checkpoint, player):
 	print("car %d" % player + "drove though checkpoint %d" %  checkpoint)
 	checkpoints[[player,checkpoint]] = true
 	print(checkpoints)
+
+func check_checkpoints(player):
+	for n in range(checkpoint_list.size()):
+		var all = false
+		if (checkpoints.has([player,checkpoint_list[n]])):
+			all = true
+		else:
+			all = false
+		if (all):
+			print("All checkpoints")
+

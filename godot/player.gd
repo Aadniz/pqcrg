@@ -69,3 +69,7 @@ func _on_quit_pressed():
 	main.exit_game()
 	OS.delay_msec(100)
 	get_tree().quit()
+
+
+func _on_testbutton_pressed():
+	main.check_checkpoints(name.to_int())

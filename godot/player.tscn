@@ -159,8 +159,22 @@ text = "Main menu"
 layout_mode = 2
 text = "Quit"
 
+[node name="testbutton" type="Button" parent="."]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -91.0
+offset_top = -15.5
+offset_bottom = 15.5
+grow_horizontal = 0
+grow_vertical = 2
+text = "testbutton"
+
 [connection signal="pressed" from="Control/VBoxContainer/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="Control/VBoxContainer/Main_menu" to="." method="_on_main_menu_pressed"]
 [connection signal="pressed" from="Control/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="testbutton" to="." method="_on_testbutton_pressed"]
 
 [editable path="car2"]

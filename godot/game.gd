@@ -128,12 +128,13 @@ func activate_checkpoint(checkpoint, player):
 	print(checkpoints)
 
 func check_checkpoints(player):
+	var all = false
 	for n in range(checkpoint_list.size()):
-		var all = false
 		if (checkpoints.has([player,checkpoint_list[n]])):
 			all = true
 		else:
 			all = false
-		if (all):
-			print("All checkpoints")
+			break
+	if (all):
+		print("All checkpoints")
 

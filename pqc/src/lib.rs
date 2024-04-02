@@ -29,7 +29,7 @@ impl Pqc {
     #[func]
     fn start_host_bridge(&mut self, port: u16) {
         godot_print!(
-            "Host bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port 127.0.0.1:{port}"
+            "Host bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port 127.0.0.1:{port} blarg"
         );
         thread::spawn(move || server::listen(port.clone()));
     }

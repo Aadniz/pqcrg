@@ -1,6 +1,8 @@
 extends Node
 
 var player_list = []
+var checkpoint_list = []
+var checkpoints = {}
 var peer = ENetMultiplayerPeer.new()
 @export var player_scene : PackedScene
 @onready var ui = $UI
@@ -117,6 +119,10 @@ func _on_check_box_toggled(toggled_on):
 		
 func add_checkpoint(id):
 	print("checkpoint added %d" % id)
+	checkpoint_list.append(id)
+	print(checkpoint_list)
 
 func activate_checkpoint(checkpoint, player):
 	print("car %d" % player + "drove though checkpoint %d" %  checkpoint)
+	checkpoints[[player,checkpoint]] = true
+	print(checkpoints)

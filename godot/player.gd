@@ -16,6 +16,8 @@ func _ready():
 	#position += Vector3(RandomNumberGenerator.new().randf_range(-10.0, 10.0),0,0)
 	camera_3d.current = is_multiplayer_authority()
 	speedometer.show()
+	$respawn_point.position = main.get_startpoint()
+	respawn()
 	
 
 func _enter_tree():

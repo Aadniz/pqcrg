@@ -32,9 +32,9 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 
 mesh = SubResource("TorusMesh_xax77")
 script = ExtResource("1_ti5id")
 
-[node name="Area3D" type="Area3D" parent="."]
+[node name="Checkpoint_Area" type="Area3D" parent="."]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Checkpoint_Area"]
 shape = SubResource("CylinderShape3D_r5tyy")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
@@ -51,4 +51,4 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 mesh = SubResource("CylinderMesh_k40uk")
 skeleton = NodePath("../MeshInstance3D")
 
-[connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]
+[connection signal="body_entered" from="Checkpoint_Area" to="." method="_on_area_3d_body_entered"]

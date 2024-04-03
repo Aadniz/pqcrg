@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://s5o55y66b4h7"]
+[gd_scene load_steps=7 format=3 uid="uid://bfj3gvsaxm30x"]
 
-[ext_resource type="Script" path="res://goal.gd" id="1_n3s2d"]
-[ext_resource type="Texture2D" uid="uid://b6bol26l0j7hv" path="res://resources/checkered.png" id="2_2a2xb"]
+[ext_resource type="Script" path="res://start.gd" id="1_pil12"]
+[ext_resource type="Texture2D" uid="uid://b6bol26l0j7hv" path="res://resources/checkered.png" id="2_lec2k"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j04i5"]
-albedo_texture = ExtResource("2_2a2xb")
+albedo_color = Color(1, 0, 0, 1)
+albedo_texture = ExtResource("2_lec2k")
 uv1_triplanar = true
 uv1_triplanar_sharpness = 150.0
 
@@ -22,9 +23,9 @@ data = PackedVector3Array(-0.5853, 0, -2.9424, 0, 0.1913, -3.0381, 0, 0, -3, -0.
 height = 0.8
 radius = 3.5
 
-[node name="Goal" type="Node3D"]
+[node name="Start" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-script = ExtResource("1_n3s2d")
+script = ExtResource("1_pil12")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("TorusMesh_tams7")
@@ -34,9 +35,9 @@ mesh = SubResource("TorusMesh_tams7")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_lqpw3")
 
-[node name="Goal_Area" type="Area3D" parent="."]
+[node name="Start_Area" type="Area3D" parent="."]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Goal_Area"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Start_Area"]
 shape = SubResource("CylinderShape3D_3bp3f")
 
-[connection signal="body_entered" from="Goal_Area" to="." method="_on_area_3d_body_entered"]
+[connection signal="body_entered" from="Start_Area" to="." method="_on_area_3d_body_entered"]

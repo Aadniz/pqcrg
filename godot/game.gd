@@ -4,6 +4,7 @@ var player_list = []
 var checkpoint_list = []
 var checkpoints = {}
 var peer = ENetMultiplayerPeer.new()
+var startpoint = Vector3.ZERO
 @export var player_scene : PackedScene
 @onready var ui = $UI
 @onready var lobby = $Lobby
@@ -11,6 +12,7 @@ var peer = ENetMultiplayerPeer.new()
 @onready var port_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/PortTextEdit
 @onready var pqc_toggle_checkbox = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2/CheckBox
 @onready var pqc = Pqc.new()
+
 
 const DEFAULT_PORT = 2522
 const DEFAULT_PQC_PORT = 3522
@@ -143,3 +145,8 @@ func check_checkpoints(player):
 	if (all):
 		print("All checkpoints")
 
+func set_start(position):
+	startpoint = position
+
+func get_startpoint():
+	return startpoint

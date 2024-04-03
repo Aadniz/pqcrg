@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=3 uid="uid://bo6i7751rdw7e"]
+[gd_scene load_steps=14 format=3 uid="uid://bo6i7751rdw7e"]
 
 [ext_resource type="PackedScene" uid="uid://p7rtmee3sovb" path="res://checkpoint.tscn" id="1_a6nyb"]
 [ext_resource type="ArrayMesh" uid="uid://d4dlbn6uq0gq1" path="res://resources/Sand2.obj" id="2_i4ywd"]
 [ext_resource type="Texture2D" uid="uid://b8jeyucnc7225" path="res://resources/Tileable classic sand texture.jpg" id="2_uanrk"]
 [ext_resource type="PackedScene" uid="uid://s5o55y66b4h7" path="res://goal.tscn" id="4_rwbie"]
+[ext_resource type="PackedScene" uid="uid://bfj3gvsaxm30x" path="res://start.tscn" id="5_866o2"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_cymr7"]
 lightmap_size_hint = Vector2i(14, 21)
@@ -116,6 +117,9 @@ skeleton = NodePath("../../..")
 
 [node name="Goal" parent="Map/Props" instance=ExtResource("4_rwbie")]
 transform = Transform3D(0.151261, -0.988494, 4.32084e-08, 0, -4.37114e-08, -1, 0.988494, 0.151261, -6.61182e-09, 79.642, 0.979294, -12.0012)
+
+[node name="Start" parent="Map/Props" instance=ExtResource("5_866o2")]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 15.5594, 2.4386, -11.2298)
 
 [node name="Wall" type="MeshInstance3D" parent="Map"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2500, 0, 0)

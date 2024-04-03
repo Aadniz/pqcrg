@@ -15,13 +15,15 @@ var peer = ENetMultiplayerPeer.new()
 const DEFAULT_PORT = 2522
 const DEFAULT_PQC_PORT = 3522
 const DEFAULT_IP = "127.0.0.1"
+var no_pqc = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var args = OS.get_cmdline_args()
 	var options = {
 		"--port": DEFAULT_PORT,
-		"--server": false
+		"--server": false,
+		"--no-pqc": false
 	}
 	
 	for i in range(args.size()):
@@ -33,6 +35,9 @@ func _ready():
 	
 	if options["--server"]:
 		host_game(options["--port"])
+	
+	if options["--no-pqc"]:
+		no_pqc = false
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -72,7 +77,7 @@ func _on_host_button_pressed():
 
 
 func host_game(port: int):
-	if pqc_toggle_checkbox.button_pressed == true:
+	if pqc_toggle_checkbox.button_pressed == true and !no_pqc:
 		pqc.start_host_bridge(port)
 	peer.create_server(port)
 	multiplayer.multiplayer_peer = peer

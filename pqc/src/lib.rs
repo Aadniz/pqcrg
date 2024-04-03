@@ -1,5 +1,5 @@
 use godot::prelude::*;
-use std::net::IpAddr;
+use std::net::ToSocketAddrs;
 use std::thread;
 
 mod client;
@@ -29,22 +29,26 @@ impl Pqc {
     #[func]
     fn start_host_bridge(&mut self, port: u16) {
         godot_print!(
-            "Host bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port 127.0.0.1:{port}"
+            "Host bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port 127.0.0.1:{port} blarg6"
         );
         thread::spawn(move || server::listen(port.clone()));
     }
 
     #[func]
-    fn start_client_bridge(&mut self, ip: String, port: u16) {
+    fn start_client_bridge(&mut self, host: String, port: u16) {
         godot_print!(
-            "Client bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port {ip}:{port}"
+            "Client bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port {host}:{port}"
         );
-        match ip.parse::<IpAddr>() {
-            Ok(ip) => {
-                thread::spawn(move || {
-                    let mut client = client::Client::new();
-                    client.pass(ip, port);
-                });
+        match (host.as_str(), port).to_socket_addrs() {
+            Ok(mut addrs) => {
+                if let Some(addr) = addrs.next() {
+                    thread::spawn(move || {
+                        let mut client = client::Client::new();
+                        client.pass(addr.ip(), addr.port());
+                    });
+                } else {
+                    godot_error!("No IP addresses found for the provided hostname.");
+                }
             }
             Err(e) => {
                 godot_error!("{e}");

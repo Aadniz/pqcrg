@@ -4,7 +4,7 @@ var player_list = []
 var checkpoint_list = []
 var checkpoints = {}
 var peer = ENetMultiplayerPeer.new()
-var startpoint = Vector3.ZERO
+var startpoint = [Vector3.ZERO,Vector3.ZERO]
 @export var player_scene : PackedScene
 @onready var ui = $UI
 @onready var lobby = $Lobby
@@ -145,8 +145,9 @@ func check_checkpoints(player):
 	if (all):
 		print("All checkpoints")
 
-func set_start(position):
-	startpoint = position
+func set_start(position, rotation):
+	startpoint[0] = position
+	startpoint[1] = rotation
 
 func get_startpoint():
 	return startpoint

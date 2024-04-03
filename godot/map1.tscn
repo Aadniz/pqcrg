@@ -116,10 +116,10 @@ transform = Transform3D(-0.161604, 0.986856, 4.31368e-08, 0, -4.37114e-08, 1, 0.
 skeleton = NodePath("../../..")
 
 [node name="Goal" parent="Map/Props" instance=ExtResource("4_rwbie")]
-transform = Transform3D(0.151261, -0.988494, 4.32084e-08, 0, -4.37114e-08, -1, 0.988494, 0.151261, -6.61182e-09, 79.642, 0.979294, -12.0012)
+transform = Transform3D(0.346936, -0.937889, -4.09964e-08, 0, -4.37114e-08, 1, -0.937889, -0.346936, -1.5165e-08, 79.642, 0.979294, -12.0012)
 
 [node name="Start" parent="Map/Props" instance=ExtResource("5_866o2")]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 15.5594, 2.4386, -11.2298)
+transform = Transform3D(0.821149, 0.570714, 2.49467e-08, 0, -4.37114e-08, 1, 0.570714, -0.821149, -3.58936e-08, 15.5594, 2.4386, -11.2298)
 
 [node name="Wall" type="MeshInstance3D" parent="Map"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2500, 0, 0)

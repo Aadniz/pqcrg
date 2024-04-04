@@ -5,7 +5,7 @@ extends VehicleBody3D
 @onready var speedometer = $Speedometer
 @onready var pause_menu = $Control
 
-const MAX_STEER = 0.8
+const MAX_STEER = 0.5
 const ENGINE_POWER = 300
 var paused = false
 var respawn_rotation = Vector3.ZERO

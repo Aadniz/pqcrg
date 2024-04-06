@@ -12,6 +12,8 @@ var startpoint = [Vector3.ZERO,Vector3.ZERO]
 @onready var port_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/PortTextEdit
 @onready var pqc_toggle_checkbox = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2/CheckBox
 @onready var pqc = Pqc.new()
+var paused = false
+@onready var pause_menu = $Pause_Menu
 
 
 const DEFAULT_PORT = 2522
@@ -151,3 +153,11 @@ func set_start(position, rotation):
 
 func get_startpoint():
 	return startpoint
+
+func pause():
+	if paused:
+		pause_menu.hide()
+	else:
+		pause_menu.show()
+	paused = !paused
+	print(paused)

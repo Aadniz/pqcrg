@@ -14,6 +14,7 @@ var startpoint = [Vector3.ZERO,Vector3.ZERO]
 @onready var pqc = Pqc.new()
 var paused = false
 @onready var pause_menu = $Pause_Menu
+@onready var race_finished = $Race_Finished
 
 
 const DEFAULT_PORT = 2522
@@ -145,6 +146,7 @@ func check_checkpoints(player):
 			all = false
 			break
 	if (all):
+		race_finished.show()
 		print("All checkpoints")
 
 func set_start(position, rotation):

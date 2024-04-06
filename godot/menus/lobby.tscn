@@ -12,7 +12,6 @@ grow_vertical = 2
 script = ExtResource("1_mea37")
 
 [node name="ColorRect" type="ColorRect" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -43,8 +42,10 @@ text = "Quit"
 layout_mode = 2
 text = "Player List"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer2"]
+[node name="Player_List" type="RichTextLabel" parent="VBoxContainer2"]
 layout_mode = 2
+text = "placeholder"
+fit_content = true
 
 [connection signal="pressed" from="VBoxContainer2/HBoxContainer/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="VBoxContainer2/HBoxContainer/Quit" to="." method="_on_quit_pressed"]

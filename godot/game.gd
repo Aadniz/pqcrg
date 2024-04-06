@@ -94,6 +94,7 @@ func add_player(id=1):
 	var player = player_scene.instantiate()
 	player.name = str(id)
 	player_list.append(player.name.to_int())
+	lobby.update_player_list(player_list)
 	print(player_list)
 	call_deferred("add_child", player)
 
@@ -108,6 +109,7 @@ func del_player(id):
 	get_node(str(id)).queue_free()
 	multiplayer.disconnect_peer(id)
 	player_list.erase(id)
+	lobby.update_player_list(player_list)
 	print(player_list)
 
 func start_race():

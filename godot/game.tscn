@@ -78,6 +78,11 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 0
 
+[node name="NameTextEdit" type="TextEdit" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Nickname"
+scroll_fit_content_height = true
+
 [node name="HBoxContainer" type="HBoxContainer" parent="UI/MarginContainer/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 

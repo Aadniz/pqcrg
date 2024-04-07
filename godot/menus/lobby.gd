@@ -13,6 +13,6 @@ func _on_quit_pressed():
 
 func update_player_list(input):
 	var temp_str = ""
-	for n in input.size():
-		temp_str += "%s \n" % str(input[n])
+	for i in GameManager.Players:
+			temp_str += "%s \n" % str(GameManager.Players[i].id)
 	player_list.text = temp_str

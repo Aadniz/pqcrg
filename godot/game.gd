@@ -15,6 +15,7 @@ var paused = false
 @onready var pause_menu = $Pause_Menu
 @onready var race_finished = $Race_Finished
 @onready var name_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/NameTextEdit
+signal server_disconnected
 
 
 const DEFAULT_PORT = 2522
@@ -47,7 +48,14 @@ func _ready():
 	multiplayer.peer_disconnected.connect(peer_disconnected)
 	multiplayer.connected_to_server.connect(connected_to_server)
 	multiplayer.connection_failed.connect(connection_failed)
+	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
+func _on_server_disconnected():
+	multiplayer.multiplayer_peer = null
+	server_disconnected.emit()
+	GameManager.Players.clear()
+	ui.show()
+
 func peer_connected(id):
 	print("Player Connected " + str(id))
 	
@@ -56,6 +64,7 @@ func peer_disconnected(id):
 	print("Player Disconnected " + str(id))
 	GameManager.Players.erase(id)
 	lobby.update_player_list(GameManager.Players)
+	del_player.rpc(id)
 # called only from clients
 func connected_to_server():
 	print("connected To Sever!")
@@ -78,7 +87,7 @@ func SendPlayerInformation(name, id):
 @rpc("any_peer")
 func player_finished(id):
 	GameManager.Players[id].finished = true
-	print(GameManager.Players)
+
 # called only from clients
 func connection_failed():
 	print("Couldnt Connect")
@@ -131,15 +140,10 @@ func add_player(id=1):
 	call_deferred("add_child", player)
 
 func exit_game():
-	del_player(peer.get_unique_id())
+	multiplayer.multiplayer_peer.close()
 
-func del_player(id):
-	rpc("_disconnect_2", id)
-	rpc("_del_player", id)
-
-@rpc("any_peer","call_local") func _del_player(id):
+@rpc("any_peer") func del_player(id):
 	get_node(str(id)).queue_free()
-	multiplayer.disconnect_peer(id)
 
 func start_race():
 	lobby.hide()
@@ -159,14 +163,12 @@ func _on_check_box_toggled(toggled_on):
 		port_text_edit.placeholder_text = str(DEFAULT_PORT)
 		
 func add_checkpoint(id):
-	print("checkpoint added %d" % id)
 	checkpoint_list.append(id)
-	print(checkpoint_list)
 
 func activate_checkpoint(checkpoint, player):
-	print("car %d" % player + "drove though checkpoint %d" %  checkpoint)
+	#print("car %d" % player + "drove though checkpoint %d" %  checkpoint)
 	checkpoints[[player,checkpoint]] = true
-	print(checkpoints)
+	
 
 func check_checkpoints(player):
 	var all = false
@@ -180,7 +182,7 @@ func check_checkpoints(player):
 		player_finished.rpc(player)
 		if multiplayer.get_unique_id() == player:
 			race_finished.show()
-			print("All checkpoints")
+
 
 func set_start(position, rotation):
 	startpoint[0] = position
@@ -195,4 +197,3 @@ func pause():
 	else:
 		pause_menu.show()
 	paused = !paused
-	print(paused)

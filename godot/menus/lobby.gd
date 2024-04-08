@@ -2,11 +2,14 @@ extends Control
 @onready var main = $"../"
 @onready var lobby = $"."
 @onready var player_list = $VBoxContainer2/Player_List
+@onready var start = $VBoxContainer2/HBoxContainer/Start
 
-
+		
+func hide_start():
+	start.hide()
+	
 func _on_start_pressed():
-	hide()
-	main.start_race()
+	main.start_race.rpc()
 
 func _on_quit_pressed():
 	hide()

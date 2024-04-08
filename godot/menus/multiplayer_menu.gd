@@ -52,21 +52,25 @@ func _on_server_disconnected():
 func peer_connected(id):
 	print("Player Connected " + str(id))
 	
+	
 # this get called on the server and clients
 func peer_disconnected(id):
 	print("Player Disconnected " + str(id))
-	GameManager.Players.erase(id)
 	main.update_lobby()
-	del_player.rpc(id)
+	if(GameManager.game_state and GameManager.Players[id].has_car):
+		main.del_player.rpc(id)
+	GameManager.Players.erase(id)
+	
 # called only from clients
 func connected_to_server():
 	print("connected To Sever!")
 	SendPlayerInformation.rpc_id(1, name_text_edit.text, multiplayer.get_unique_id())
+	
 
-
-@rpc("any_peer") func del_player(id):
-	get_node(str(id)).queue_free()
-
+@rpc("any_peer")
+func sync_game_state(gamestate):
+	GameManager.game_state = gamestate
+	print(GameManager.game_state)
 
 @rpc("any_peer")
 func SendPlayerInformation(player_name, id):
@@ -74,7 +78,8 @@ func SendPlayerInformation(player_name, id):
 		GameManager.Players[id] ={
 			"name" : player_name,
 			"id" : id,
-			"finished": false
+			"finished": false,
+			"has_car": false
 		}
 	
 	if multiplayer.is_server():
@@ -120,8 +125,6 @@ func _on_host_button_pressed():
 		port = DEFAULT_PORT
 	host_game(int(port))
 	SendPlayerInformation(name_text_edit.text, multiplayer.get_unique_id())
-	# Spawn itself
-	#add_player()
 	hide()
 	main.show_lobby()
 
@@ -131,5 +134,3 @@ func host_game(port: int):
 		pqc.start_host_bridge(port)
 	peer.create_server(port)
 	multiplayer.multiplayer_peer = peer
-	# physically spawn a player
-	#multiplayer.peer_connected.connect(add_player)

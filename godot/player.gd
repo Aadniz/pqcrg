@@ -1,8 +1,9 @@
 extends VehicleBody3D
 
 @onready var camera_3d = $Node3D/SpringArm3D/Camera3D
-@onready var main = $"../"
+@onready var main = $"../../"
 @onready var speedometer = $Speedometer
+@onready var multiplayer_synchronizer = $MultiplayerSynchronizer
 
 
 const MAX_STEER = 0.5
@@ -13,16 +14,16 @@ var respawn_momentum = Vector3.ZERO
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#position += Vector3(RandomNumberGenerator.new().randf_range(-10.0, 10.0),0,0)
-	camera_3d.current = is_multiplayer_authority()
+	multiplayer_synchronizer.set_multiplayer_authority(name.to_int())
+	camera_3d.current = multiplayer_synchronizer.is_multiplayer_authority()
 	speedometer.show()
 	var spawn = main.get_startpoint()
 	$respawn_point.position = spawn[0]
 	respawn_rotation = spawn[1]
 	respawn()
-	
 
 func _enter_tree():
-	set_multiplayer_authority(name.to_int())
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
@@ -32,7 +33,7 @@ func _process(_delta):
 		options_menu()
 
 func _physics_process(delta):
-	if !is_multiplayer_authority():
+	if !multiplayer_synchronizer.is_multiplayer_authority():
 		return
 	steering = move_toward(steering, Input.get_axis("right","left")*MAX_STEER,delta*2.5)
 	engine_force = Input.get_axis("backward","forward") * ENGINE_POWER
@@ -52,7 +53,7 @@ func respawn():
 	position = $respawn_point.position
 
 func options_menu():
-	if is_multiplayer_authority():
+	if multiplayer_synchronizer.is_multiplayer_authority():
 		main.pause()
 
 func _on_testbutton_pressed():

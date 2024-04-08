@@ -4,7 +4,8 @@ var checkpoint_list = []
 var checkpoints = {}
 
 var startpoint = [Vector3.ZERO,Vector3.ZERO]
-@export var player_scene : PackedScene
+@export var map_scene : PackedScene
+
 @onready var ui = $UI
 @onready var lobby = $Lobby
 @onready var pause_menu = $Pause_Menu
@@ -16,25 +17,30 @@ func _ready():
 	pass
 	
 
-func add_player(id=1):
-	var player = player_scene.instantiate()
-	player.name = str(id)
-	call_deferred("add_child", player)
-
 func disconnect_player():
 	multiplayer.multiplayer_peer.close()
 
+@rpc("any_peer", "call_local")
 func start_race():
-	pass
+	var map = load("res://map1.tscn").instantiate()
+	add_child(map)
+	lobby.hide()
+	GameManager.game_state = true
 
 func main_menu():
 	ui.show()
 
 func show_lobby():
 	lobby.show()
+	if !multiplayer.is_server():
+		lobby.hide_start()
 
+@rpc("call_local")
+func del_player(id):
+	find_child(str(id), true, false).queue_free()
+	
 
-@rpc("any_peer")
+@rpc("any_peer","call_local")
 func player_finished(id):
 	GameManager.Players[id].finished = true
 

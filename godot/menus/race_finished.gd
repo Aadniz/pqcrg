@@ -8,4 +8,6 @@ func _on_quit_pressed():
 
 
 func _on_restart_pressed():
-	pass # Replace with function body.
+	main.del_map()
+	main.show_lobby()
+	hide()

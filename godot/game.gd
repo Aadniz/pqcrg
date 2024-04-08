@@ -2,166 +2,45 @@ extends Node
 
 var checkpoint_list = []
 var checkpoints = {}
-var peer = ENetMultiplayerPeer.new()
+
 var startpoint = [Vector3.ZERO,Vector3.ZERO]
 @export var player_scene : PackedScene
 @onready var ui = $UI
 @onready var lobby = $Lobby
-@onready var ip_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/IpTextEdit
-@onready var port_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/PortTextEdit
-@onready var pqc_toggle_checkbox = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2/CheckBox
-@onready var pqc = Pqc.new()
-var paused = false
 @onready var pause_menu = $Pause_Menu
 @onready var race_finished = $Race_Finished
-@onready var name_text_edit = $UI/MarginContainer/Panel/MarginContainer/VBoxContainer/NameTextEdit
-signal server_disconnected
-
-
-const DEFAULT_PORT = 2522
-const DEFAULT_PQC_PORT = 3522
-const DEFAULT_IP = "127.0.0.1"
-var no_pqc = false
+var paused = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var args = OS.get_cmdline_args()
-	var options = {
-		"--port": DEFAULT_PORT,
-		"--server": false,
-		"--no-pqc": false
-	}
+	pass
 	
-	for i in range(args.size()):
-		if args[i] in options:
-			if typeof(options[args[i]]) == TYPE_BOOL:
-				options[args[i]] = true
-			elif i + 1 < args.size():
-				options[args[i]] = int(args[i + 1])
-	
-	if options["--server"]:
-		host_game(options["--port"])
-	
-	if options["--no-pqc"]:
-		no_pqc = false
-	multiplayer.peer_connected.connect(peer_connected)
-	multiplayer.peer_disconnected.connect(peer_disconnected)
-	multiplayer.connected_to_server.connect(connected_to_server)
-	multiplayer.connection_failed.connect(connection_failed)
-	multiplayer.server_disconnected.connect(_on_server_disconnected)
-	
-func _on_server_disconnected():
-	multiplayer.multiplayer_peer = null
-	server_disconnected.emit()
-	GameManager.Players.clear()
-	ui.show()
-
-func peer_connected(id):
-	print("Player Connected " + str(id))
-	
-# this get called on the server and clients
-func peer_disconnected(id):
-	print("Player Disconnected " + str(id))
-	GameManager.Players.erase(id)
-	lobby.update_player_list(GameManager.Players)
-	del_player.rpc(id)
-# called only from clients
-func connected_to_server():
-	print("connected To Sever!")
-	SendPlayerInformation.rpc_id(1, name_text_edit.text, multiplayer.get_unique_id())
-
-@rpc("any_peer")
-func SendPlayerInformation(name, id):
-	if !GameManager.Players.has(id):
-		GameManager.Players[id] ={
-			"name" : name,
-			"id" : id,
-			"finished": false
-		}
-	
-	if multiplayer.is_server():
-		for i in GameManager.Players:
-			SendPlayerInformation.rpc(GameManager.Players[i].name, i)
-	lobby.update_player_list(GameManager.Players)
-
-@rpc("any_peer")
-func player_finished(id):
-	GameManager.Players[id].finished = true
-
-# called only from clients
-func connection_failed():
-	print("Couldnt Connect")
-
-
-func _on_join_button_pressed():
-	var ip = ip_text_edit.get_line(0)
-	var port = port_text_edit.get_line(0)
-	if (port == ""):
-		if pqc_toggle_checkbox.button_pressed == true:
-			port = DEFAULT_PQC_PORT
-		else:
-			port = DEFAULT_PORT
-	if (ip == ""):
-		ip = DEFAULT_IP
-	if pqc_toggle_checkbox.button_pressed == true:
-		pqc.start_client_bridge(ip, int(port))
-		peer.create_client("127.0.0.1", 3522)
-	else:
-		peer.create_client(ip, int(port))
-	multiplayer.multiplayer_peer = peer
-	ui.hide()
-	lobby.show()
-
-
-func _on_host_button_pressed():
-	var port = port_text_edit.get_line(0)
-	if (port == ""):
-		port = DEFAULT_PORT
-	host_game(int(port))
-	SendPlayerInformation(name_text_edit.text, multiplayer.get_unique_id())
-	# Spawn itself
-	add_player()
-	ui.hide()
-	lobby.show()
-
-
-func host_game(port: int):
-	if pqc_toggle_checkbox.button_pressed == true and !no_pqc:
-		pqc.start_host_bridge(port)
-	peer.create_server(port)
-	multiplayer.multiplayer_peer = peer
-	# physically spawn a player
-	multiplayer.peer_connected.connect(add_player)
-
 
 func add_player(id=1):
 	var player = player_scene.instantiate()
 	player.name = str(id)
 	call_deferred("add_child", player)
 
-func exit_game():
+func disconnect_player():
 	multiplayer.multiplayer_peer.close()
 
-@rpc("any_peer") func del_player(id):
-	get_node(str(id)).queue_free()
-
 func start_race():
-	lobby.hide()
-
-func quit_lobby():
-	ui.show()
-	lobby.hide()
+	pass
 
 func main_menu():
 	ui.show()
 
+func show_lobby():
+	lobby.show()
 
-func _on_check_box_toggled(toggled_on):
-	if toggled_on:
-		port_text_edit.placeholder_text = str(DEFAULT_PQC_PORT)
-	else:
-		port_text_edit.placeholder_text = str(DEFAULT_PORT)
-		
+
+@rpc("any_peer")
+func player_finished(id):
+	GameManager.Players[id].finished = true
+
+func update_lobby():
+	lobby.update_player_list()
+
 func add_checkpoint(id):
 	checkpoint_list.append(id)
 

@@ -39,5 +39,3 @@ shape = SubResource("ConcavePolygonShape3D_cs6oo")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Start_Area"]
 shape = SubResource("CylinderShape3D_3bp3f")
-
-[connection signal="body_entered" from="Start_Area" to="." method="_on_area_3d_body_entered"]

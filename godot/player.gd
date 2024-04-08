@@ -25,7 +25,7 @@ func _enter_tree():
 	set_multiplayer_authority(name.to_int())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	if Input.is_action_just_pressed("respawn"):
 		respawn()
 	if Input.is_action_just_pressed("menu"):

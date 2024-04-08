@@ -1,10 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://c7nbw8igsr1nd"]
+[gd_scene load_steps=4 format=3 uid="uid://cdx20pt03hgda"]
 
-[ext_resource type="Script" path="res://menus/menu.gd" id="1_ix47l"]
-[ext_resource type="PackedScene" uid="uid://b6nicylmfjx7j" path="res://player.tscn" id="2_01x4e"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2i1i4"]
-bg_color = Color(0.0538233, 0.0921524, 0.159106, 1)
+[ext_resource type="Script" path="res://menus/multiplayer_menu.gd" id="1_xit1i"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t88ej"]
 bg_color = Color(0.157331, 0.193666, 0.402028, 1)
@@ -12,15 +8,14 @@ bg_color = Color(0.157331, 0.193666, 0.402028, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ut22x"]
 bg_color = Color(0.157331, 0.193666, 0.402028, 1)
 
-[node name="Control" type="Control"]
+[node name="UI" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_ix47l")
-player_scene = ExtResource("2_01x4e")
+script = ExtResource("1_xit1i")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -29,23 +24,24 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 400
-theme_override_constants/margin_top = 150
-theme_override_constants/margin_right = 400
-theme_override_constants/margin_bottom = 150
 
 [node name="Panel" type="Panel" parent="MarginContainer"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_2i1i4")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Panel"]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -148.0
+offset_top = -90.0
+offset_right = 148.0
+offset_bottom = 90.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 10
+theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
@@ -63,6 +59,11 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 0
 
+[node name="NameTextEdit" type="TextEdit" parent="MarginContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Nickname"
+scroll_fit_content_height = true
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
@@ -79,9 +80,23 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.6
 theme_override_colors/background_color = Color(0.157331, 0.193666, 0.402028, 1)
-placeholder_text = "2522"
+placeholder_text = "3522"
 scroll_fit_content_height = true
 caret_type = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CheckBox" type="CheckBox" parent="MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+button_pressed = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Enable PQC"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
 
 [node name="JoinButton" type="Button" parent="MarginContainer/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -92,3 +107,6 @@ text = "Join"
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_ut22x")
 text = "Host"
+
+[connection signal="pressed" from="MarginContainer/Panel/MarginContainer/VBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
+[connection signal="pressed" from="MarginContainer/Panel/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]

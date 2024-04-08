@@ -5,14 +5,14 @@ extends Control
 
 
 func _on_start_pressed():
+	hide()
 	main.start_race()
 
 func _on_quit_pressed():
-	main.quit_lobby()
-	main.exit_game()
-	
+	hide()
+	main.disconnect_player()
 
-func update_player_list(input):
+func update_player_list():
 	var temp_str = ""
 	for i in GameManager.Players:
 			temp_str += "%s \n" % str(GameManager.Players[i].id)

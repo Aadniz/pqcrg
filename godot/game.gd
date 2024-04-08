@@ -23,6 +23,7 @@ func disconnect_player():
 @rpc("any_peer", "call_local")
 func start_race():
 	var map = load("res://map1.tscn").instantiate()
+	map.name = "map"
 	add_child(map)
 	lobby.hide()
 	GameManager.game_state = true
@@ -39,7 +40,10 @@ func show_lobby():
 func del_player(id):
 	find_child(str(id), true, false).queue_free()
 	
-
+@rpc("call_local")
+func del_map():
+	find_child("map", true, false).queue_free()
+	
 @rpc("any_peer","call_local")
 func player_finished(id):
 	GameManager.Players[id].finished = true

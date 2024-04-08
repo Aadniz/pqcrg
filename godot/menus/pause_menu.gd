@@ -9,6 +9,7 @@ func _on_resume_pressed():
 func _on_main_menu_pressed():
 	main.pause()
 	main.disconnect_player()
+	main.del_map()
 
 func _on_quit_pressed():
 	main.disconnect_player()

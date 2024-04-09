@@ -45,4 +45,14 @@
       ''-I${pkgs.glib.out}/lib/glib-2.0/include/''
     ];
 
+
+    # For python analysis
+    packages = [
+      (pkgs.python3.withPackages (python-pkgs: with python-pkgs; [
+        pandas
+        matplotlib
+        scapy
+      ]))
+    ];
+
   }

@@ -37,12 +37,12 @@ func _ready():
 				options[args[i]] = true
 			elif i + 1 < args.size():
 				options[args[i]] = int(args[i + 1])
+				
+	if options["--no-pqc"]:
+		no_pqc = true
 	
 	if options["--server"]:
 		host_game(options["--port"])
-	
-	if options["--no-pqc"]:
-		no_pqc = false
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -82,7 +82,7 @@ func _on_host_button_pressed():
 
 
 func host_game(port: int):
-	if pqc_toggle_checkbox.button_pressed == true and !no_pqc:
+	if pqc_toggle_checkbox.button_pressed == true and not no_pqc:
 		pqc.start_host_bridge(port)
 	peer.create_server(port)
 	multiplayer.multiplayer_peer = peer

@@ -36,13 +36,17 @@ func show_lobby():
 	if !multiplayer.is_server():
 		lobby.hide_start()
 
-@rpc("call_local")
+@rpc("any_peer","call_local")
 func del_player(id):
-	find_child(str(id), true, false).queue_free()
+	var node = find_child(str(id), true, false)
+	if node != null :
+		node.queue_free()
 	
-@rpc("call_local")
+@rpc("any_peer","call_local")
 func del_map():
-	find_child("map", true, false).queue_free()
+	var node = find_child("map", true, false)
+	if node != null :
+		node.queue_free()
 	
 @rpc("any_peer","call_local")
 func player_finished(id):

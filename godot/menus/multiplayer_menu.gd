@@ -56,10 +56,10 @@ func peer_connected(id):
 # this get called on the server and clients
 func peer_disconnected(id):
 	print("Player Disconnected " + str(id))
-	main.update_lobby()
 	if(GameManager.game_state and GameManager.Players[id].has_car):
 		main.del_player.rpc(id)
 	GameManager.Players.erase(id)
+	main.update_lobby()
 	
 # called only from clients
 func connected_to_server():

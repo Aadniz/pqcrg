@@ -11,3 +11,4 @@ func _on_restart_pressed():
 	main.del_map()
 	main.show_lobby()
 	hide()
+	main.del_player.rpc(multiplayer.get_unique_id())

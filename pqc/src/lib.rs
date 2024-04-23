@@ -29,7 +29,7 @@ impl Pqc {
     #[func]
     fn start_host_bridge(&mut self, port: u16) {
         godot_print!(
-            "Host bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port 127.0.0.1:{port} blarg6"
+            "Host bridge started on port 0.0.0.0:{BRIDGE_PORT}, forwarded to port 127.0.0.1:{port} blarg"
         );
         thread::spawn(move || server::listen(port.clone()));
     }
@@ -42,10 +42,7 @@ impl Pqc {
         match (host.as_str(), port).to_socket_addrs() {
             Ok(mut addrs) => {
                 if let Some(addr) = addrs.next() {
-                    thread::spawn(move || {
-                        let mut client = client::Client::new();
-                        client.pass(addr.ip(), addr.port());
-                    });
+                    thread::spawn(move || client::Client::new().pass(addr.ip(), addr.port()));
                 } else {
                     godot_error!("No IP addresses found for the provided hostname.");
                 }

@@ -29,34 +29,43 @@ impl Forwarder {
 
         // Spawn a new thread to handle incoming data
         thread::spawn(move || {
-            let mut buf = [0; 1024];
-            loop {
-                let (amt, _src) = match socket2.recv_from(&mut buf) {
-                    Ok((amt, src)) => (amt, src),
-                    Err(e) => {
-                        eprintln!("Failed to receive data: {}", e);
-                        continue;
-                    }
-                };
-
-                let (mut nonce, ciphertext) =
-                    match crypter::encrypt(shared_secret.clone(), &buf[..amt].to_vec()) {
-                        Ok((nonce, ciphertext)) => (nonce, ciphertext),
-                        Err(e) => {
-                            eprintln!("Failed to encrypt data: {}", e);
-                            continue;
-                        }
-                    };
-                nonce.extend(ciphertext);
-
-                // Forward the received data to the destination
-                if let Err(e) = socket_clone.send_to(&nonce, destination) {
-                    eprintln!("Failed to send data: {}", e);
-                }
-            }
+            Self::handle_incoming_data(socket2, shared_secret, socket_clone, destination)
         });
 
         Forwarder { socket }
+    }
+
+    fn handle_incoming_data(
+        listening_socket: UdpSocket,
+        shared_secret: kem::SharedSecret,
+        sending_socket: UdpSocket,
+        destination: SocketAddr,
+    ) {
+        let mut buf = [0; 1024];
+        loop {
+            let (amt, _src) = match listening_socket.recv_from(&mut buf) {
+                Ok((amt, _src)) => (amt, _src),
+                Err(e) => {
+                    eprintln!("Failed to receive data: {}", e);
+                    continue;
+                }
+            };
+
+            let (mut nonce, ciphertext) =
+                match crypter::encrypt(shared_secret.clone(), &buf[..amt].to_vec()) {
+                    Ok((nonce, ciphertext)) => (nonce, ciphertext),
+                    Err(e) => {
+                        eprintln!("Failed to encrypt data: {}", e);
+                        continue;
+                    }
+                };
+            nonce.extend(ciphertext);
+
+            // Forward the received data to the destination
+            if let Err(e) = sending_socket.send_to(&nonce, destination) {
+                eprintln!("Failed to send data: {}", e);
+            }
+        }
     }
 
     fn pass(&mut self, data: Vec<u8>, port: u16) -> Result<(), Box<dyn Error>> {

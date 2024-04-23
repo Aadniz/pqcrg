@@ -42,10 +42,7 @@ impl Pqc {
         match (host.as_str(), port).to_socket_addrs() {
             Ok(mut addrs) => {
                 if let Some(addr) = addrs.next() {
-                    thread::spawn(move || {
-                        let mut client = client::Client::new();
-                        client.pass(addr.ip(), addr.port());
-                    });
+                    thread::spawn(move || client::Client::new().pass(addr.ip(), addr.port()));
                 } else {
                     godot_error!("No IP addresses found for the provided hostname.");
                 }

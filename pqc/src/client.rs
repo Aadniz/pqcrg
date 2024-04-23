@@ -18,8 +18,8 @@ type Connections = HashMap<IpAddr, kem::SharedSecret>;
 /// The `Client` struct represents a client in a client-server model.
 pub struct Client {
     source_addr: Arc<Mutex<Option<SocketAddr>>>,
-    socket: UdpSocket,
-    passer: UdpSocket,
+    socket_sender: UdpSocket,
+    passer_listener: UdpSocket,
     connections: Arc<Mutex<Connections>>,
 }
 
@@ -27,10 +27,10 @@ impl Client {
     /// Constructs a new `Client`.
     pub fn new() -> Client {
         // Binding to 0.0.0.0:0 means it is random
-        let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
-        let socket2 = socket.try_clone().unwrap();
-        let passer = UdpSocket::bind(format!("0.0.0.0:{}", super::BRIDGE_PORT)).unwrap();
-        let passer2 = passer.try_clone().unwrap();
+        let socket_listener = UdpSocket::bind("0.0.0.0:0").unwrap();
+        let socket_sender = socket_listener.try_clone().unwrap();
+        let passer_listener = UdpSocket::bind(format!("0.0.0.0:{}", super::BRIDGE_PORT)).unwrap();
+        let passer_sender = passer_listener.try_clone().unwrap();
         let connections: Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
         let connections_clone = Arc::clone(&connections);
         let source_addr: Arc<Mutex<Option<SocketAddr>>> = Arc::new(Mutex::new(None));
@@ -39,7 +39,7 @@ impl Client {
         thread::spawn(move || {
             let mut buf = [0; 1024];
             loop {
-                let (amt, addr) = match socket2.recv_from(&mut buf) {
+                let (amt, addr) = match socket_listener.recv_from(&mut buf) {
                     Ok((amt, addr)) => (amt, addr),
                     Err(e) => {
                         eprintln!("Failed to receive data: {}", e);
@@ -76,7 +76,7 @@ impl Client {
                         let addr: &Option<SocketAddr> =
                             { &source_addr_clone.lock().unwrap().clone() };
                         if let Some(addr) = addr {
-                            if let Err(e) = passer2.send_to(&data, addr) {
+                            if let Err(e) = passer_sender.send_to(&data, addr) {
                                 eprintln!("Failed to send data: {}", e);
                             }
                         }
@@ -88,8 +88,8 @@ impl Client {
 
         Client {
             source_addr,
-            socket,
-            passer,
+            socket_sender,
+            passer_listener,
             connections,
         }
     }
@@ -99,7 +99,7 @@ impl Client {
         let mut buf = [0; 1024];
 
         loop {
-            let (amt, peer_addr) = match self.passer.recv_from(&mut buf) {
+            let (amt, peer_addr) = match self.passer_listener.recv_from(&mut buf) {
                 Ok((amt, addr)) => (amt, addr),
                 Err(e) => {
                     eprintln!("Failed to receive from UDP socket: {}", e);
@@ -152,7 +152,7 @@ impl Client {
         let (mut nonce, ciphertext) = crypter::encrypt(shared_secret.clone(), &msg)
             .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error.to_string()))?;
         nonce.extend(ciphertext);
-        self.socket.send_to(&nonce, addr)?;
+        self.socket_sender.send_to(&nonce, addr)?;
 
         Ok(())
     }

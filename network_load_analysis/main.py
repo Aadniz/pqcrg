@@ -45,18 +45,18 @@ if __name__ == "__main__":
     df_cpu['Time'] = pd.to_datetime(df_cpu['Time'], format='%I:%M:%S %p')
     df_cpu.set_index('Time', inplace=True)
     df_cpu.index = df_cpu.index.time
-    df_cpu.index = [datetime.datetime(2024, 4, 9) + pd.Timedelta(hours=t.hour-2, minutes=t.minute, seconds=t.second) for t in df_cpu.index]
+    df_cpu.index = [datetime.datetime(2024, 4, 3) + pd.Timedelta(hours=t.hour-2, minutes=t.minute, seconds=t.second) for t in df_cpu.index]
 
     # Convert the necessary columns to numeric
     for column in ['%usr', '%system', '%guest', '%wait', '%CPU']:
         df_cpu[column] = pd.to_numeric(df_cpu[column], errors='coerce')
         df_cpu[column] = df_cpu[column].fillna(0)
 
-    # Compute the mean over every 5 rows
-    df_cpu_averaged = df_cpu[['%usr', '%system', '%guest', '%wait', '%CPU']].rolling(window=5).mean()
+    ## Compute the mean over every 5 rows
+    #df_cpu_averaged = df_cpu[['%usr', '%system', '%guest', '%wait', '%CPU']].rolling(window=5).mean()
 
-    # Drop rows with NaN values that were result of the rolling mean computation
-    df_cpu_averaged = df_cpu_averaged.dropna()
+    ## Drop rows with NaN values that were result of the rolling mean computation
+    #df_cpu_averaged = df_cpu_averaged.dropna()
 
     ##
     ## Gathering pcap data
@@ -82,7 +82,11 @@ if __name__ == "__main__":
     df_pcap = df_pcap.resample('1s').count()
 
     # Merge the two DataFrames on the index
-    df = pd.merge(df_cpu_averaged, df_pcap, left_index=True, right_index=True, how='outer')
+    df = pd.merge(df_cpu, df_pcap, left_index=True, right_index=True, how='outer')
+
+    # Compute the correlation between '%CPU' usage and the number of packets per second
+    correlation = df['%CPU'].corr(df['PacketSize'])
+    print(f"Correlation between '%CPU' usage and packet count: {correlation}")
 
     ##
     ## Plotting together

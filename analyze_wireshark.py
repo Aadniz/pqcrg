@@ -8,6 +8,7 @@ import sys
 def analyze_pcap(file):
     packets = rdpcap(file)
     first_packet_time = packets[0].time if packets else None
+    last_packet_time = packets[-1].time if packets else None
     last_large_packet_time = None
     handshake_end = None
 
@@ -23,9 +24,13 @@ def analyze_pcap(file):
                 if i+1 < len(packets):  # Check if there is a next packet
                     handshake_end = packets[i+1].time
                 break
+            if 'UDP' in packets[i] and packets[i].time > last_large_packet_time:
+                if i+1 < len(packets):
+                    handshake_end = packets[i].time
+                break
 
     if first_packet_time is not None and handshake_end is not None:
-        total_time = handshake_end - first_packet_time
+        total_time = last_packet_time - handshake_end #handshake_end - first_packet_time
         return total_time
     else:
         return None
@@ -46,8 +51,9 @@ if total_times:
     max_time = max(total_times)
     avg_time = sum(total_times) / len(total_times)
 
-    print(f'Min time: {min_time*1000} ms')
-    print(f'Max time: {max_time*1000} ms')
-    print(f'Average time: {avg_time*1000} ms\n')
+    print(f'Min time: {round(min_time*1000, 3)} ms')
+    print(f'Average time: {round(avg_time*1000, 3)} ms')
+    print(f'Max time: {round(max_time*1000, 3)} ms')
+    print()
 else:
     print('No handshake packets found in the provided pcap files.')

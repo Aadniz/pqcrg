@@ -1,5 +1,9 @@
 use clap::Parser;
+use lazy_static::lazy_static;
+use openssl::pkey::{Private, Public};
+use openssl::rsa::Rsa;
 use oqs::*;
+use std::collections::HashMap;
 use std::io;
 use std::io::Write;
 use std::net::{IpAddr, Ipv4Addr};
@@ -8,10 +12,59 @@ use std::{thread, time::Duration};
 
 mod client;
 mod crypter;
+mod handshake;
+mod ip;
 mod server;
+
+lazy_static! {
+    static ref RSA: Rsa<Private> = Rsa::generate(2048).unwrap();
+    static ref PUB_KEY: Vec<u8> = RSA.public_key_to_pem().unwrap();
+}
+
+#[derive(Clone)]
+struct RsaKeypair {
+    private_key: Rsa<Private>,
+    public_key: Vec<u8>,
+}
+impl RsaKeypair {
+    pub fn new() -> RsaKeypair {
+        let private_key = Rsa::generate(2048).unwrap();
+        let public_key = private_key.public_key_to_pem().unwrap();
+        RsaKeypair {
+            private_key,
+            public_key,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub enum KEM {
+    Kyber(kem::SharedSecret),
+    Rsa(Rsa<Public>),
+    None,
+}
+pub type Connections = HashMap<u64, KEM>;
 
 pub const TCP_PORT: u16 = 2522;
 pub const UDP_PORT: u16 = 2525;
+
+#[derive(clap::ValueEnum, Clone)]
+enum HandshakeMethod {
+    Kyber,
+    Rsa,
+    None,
+}
+
+impl std::fmt::Display for HandshakeMethod {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let method = match self {
+            HandshakeMethod::Kyber => "Kyber",
+            HandshakeMethod::Rsa => "Rsa",
+            HandshakeMethod::None => "None",
+        };
+        write!(f, "{}", method)
+    }
+}
 
 /// Client-Server PQC
 ///
@@ -41,24 +94,40 @@ enum Cli {
         /// Gradually increase the stress till it has reached --packets-per-second
         #[clap(long, default_value = "false")]
         gradual: bool,
+
+        /// The algorithm to use for handshake
+        #[clap(long, default_value = "kyber")]
+        handshake_method: HandshakeMethod,
     },
 
     /// Server service
     #[clap(name = "server")]
-    Server,
+    Server {
+        /// The algorithm to use for handshake
+        #[clap(long, default_value = "kyber")]
+        handshake_method: HandshakeMethod,
+    },
 }
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli {
-        Cli::Server => server::listen(),
+        Cli::Server { handshake_method } => server::listen(handshake_method),
         Cli::Client {
             packets_per_second,
             max_stress,
             threads,
             duration,
             gradual,
-        } => stress_loop(packets_per_second, max_stress, threads, duration, gradual),
+            handshake_method,
+        } => stress_loop(
+            packets_per_second,
+            max_stress,
+            threads,
+            duration,
+            gradual,
+            handshake_method,
+        ),
     }
 
     Ok(())
@@ -70,12 +139,13 @@ fn stress_loop(
     threads: u8,
     duration: u64,
     gradual: bool,
+    method: HandshakeMethod,
 ) {
     let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
     let mut instance_counter = 0;
 
     print!("Starting in ");
-    for i in 0..10 {
+    for i in 10..0 {
         print!("{} ", 9 - i);
         io::stdout().flush().unwrap();
         thread::sleep(Duration::from_secs(1));
@@ -87,7 +157,7 @@ fn stress_loop(
             println!("Sending {} handshakes per second", i);
             for _ in 0..i {
                 instance_counter += 1;
-                let mut client = client::Client::new();
+                let mut client = client::Client::new(method.clone());
                 send_message(
                     &mut client,
                     ip,
@@ -107,10 +177,11 @@ fn stress_loop(
         let mut handles = vec![];
 
         for _ in 0..threads {
+            let method = method.clone();
             handles.push(thread::spawn(move || {
                 while start_time.elapsed() < Duration::from_secs(duration) {
                     instance_counter += 1;
-                    let mut client = client::Client::new();
+                    let mut client = client::Client::new(method.clone());
                     send_message(
                         &mut client,
                         ip,

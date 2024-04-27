@@ -13,6 +13,10 @@
       stdenv.cc.cc.lib
     ]);
 
+    nativeBuildInputs = with pkgs; [
+      rustc cargo openssl.dev pkg-config
+    ];
+
     RUSTC_VERSION = "1.76.0";
     # https://github.com/rust-lang/rust-bindgen#environment-variables
     LIBCLANG_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];

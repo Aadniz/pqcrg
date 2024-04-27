@@ -1,8 +1,10 @@
 use aes_gcm::aead::generic_array::GenericArray;
 use aes_gcm::aead::Aead;
 use aes_gcm::{Aes256Gcm, KeyInit}; // Or Aes128Gcm
-use oqs::kem::SharedSecret;
+use oqs::kem;
 use rand::Rng;
+use std::io::{Error, ErrorKind};
+use std::result::Result;
 
 /// Encrypts the given data using the provided shared secret key.
 ///
@@ -14,32 +16,56 @@ use rand::Rng;
 /// # Returns
 ///
 /// A tuple containing the nonce and the ciphertext, or an error if encryption fails.
-pub fn encrypt(key: SharedSecret, data: &[u8]) -> Result<(Vec<u8>, Vec<u8>), aes_gcm::Error> {
-    let key = &key.clone().into_vec();
-    let cipher = Aes256Gcm::new(GenericArray::from_slice(key));
-    let nonce = rand::thread_rng().gen::<[u8; 12]>();
-    let ciphertext = cipher.encrypt(GenericArray::from_slice(&nonce), data)?;
-    Ok((nonce.to_vec(), ciphertext))
+pub fn encrypt(key: super::KEM, data: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    match key {
+        super::KEM::Kyber(shared_secret) => {
+            let key = &shared_secret.clone().into_vec();
+            let cipher = Aes256Gcm::new(GenericArray::from_slice(key));
+            let mut nonce = rand::thread_rng().gen::<[u8; 12]>().to_vec();
+            let ciphertext = cipher
+                .encrypt(GenericArray::from_slice(&nonce), data)
+                .map_err(|e| Error::new(ErrorKind::Other, format!("Failed to encrypt: {e}")))?;
+            nonce.extend(ciphertext);
+            Ok(nonce)
+        }
+        super::KEM::Rsa(pub_key) => {
+            let mut ciphertext = vec![0; super::RSA.size() as usize];
+
+            let _ = pub_key.public_encrypt(data, &mut ciphertext, openssl::rsa::Padding::PKCS1)?;
+            Ok(ciphertext) // RSA doesn't use a nonce
+        }
+        super::KEM::None => Ok(vec![]),
+    }
 }
 
-/// Decrypts the given ciphertext using the provided shared secret key and nonce.
-///
-/// # Arguments
-///
-/// * `key` - The shared secret key used for decryption.
-/// * `nonce` - The nonce used in the encryption process.
-/// * `ciphertext` - The ciphertext to be decrypted.
-///
-/// # Returns
-///
-/// The decrypted data as a vector of bytes, or an error if decryption fails.
-pub fn decrypt(
-    key: SharedSecret,
-    nonce: &[u8],
-    ciphertext: &[u8],
-) -> Result<Vec<u8>, aes_gcm::Error> {
-    let key = &key.into_vec();
-    let cipher = Aes256Gcm::new(GenericArray::from_slice(key));
-    let plaintext = cipher.decrypt(GenericArray::from_slice(nonce), ciphertext)?;
+pub fn decrypt(key: &super::KEM, data: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    match key {
+        crate::KEM::Kyber(shared_secret) => decrypt_aes_gcm(shared_secret, data),
+        crate::KEM::Rsa(_) => decrypt_rsa(data),
+        crate::KEM::None => Ok(vec![]),
+    }
+}
+
+fn decrypt_rsa(buf: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let mut plaintext = vec![0; super::RSA.size() as usize];
+    let _ = super::RSA.private_decrypt(buf, &mut plaintext, openssl::rsa::Padding::PKCS1)?;
+    Ok(plaintext)
+}
+
+fn decrypt_aes_gcm(
+    key: &kem::SharedSecret,
+    data: &[u8],
+) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let nonce = &data[..12];
+    let ciphertext = &data[12..];
+
+    let key = GenericArray::clone_from_slice(&key.clone().into_vec());
+    let cipher = Aes256Gcm::new(&key);
+    let nonce = GenericArray::from_slice(nonce);
+    let ciphertext: &[u8] = ciphertext.into();
+    let plaintext = cipher
+        .decrypt(nonce, ciphertext)
+        .map_err(|e| Error::new(ErrorKind::Other, format!("Failed to decrypt: {e}")))?;
+
     Ok(plaintext)
 }

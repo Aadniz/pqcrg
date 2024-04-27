@@ -1,33 +1,29 @@
+use crate::{handshake, ip};
+
 use super::crypter;
-use base64::{engine, Engine as _};
-use oqs::*;
-use std::error::Error;
-use std::io::{Read, Write};
-use std::net::IpAddr;
-use std::result::Result;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 use std::{
     collections::HashMap,
-    net::{TcpListener, TcpStream, UdpSocket},
+    net::{TcpListener, UdpSocket},
 };
 
-/// A type alias for a map of IP addresses to shared secrets.
-type Connections = HashMap<IpAddr, kem::SharedSecret>;
+type Connections = super::Connections;
 
 /// Starts the server and listens for incoming connections.
-pub fn listen() {
+pub fn listen(handshake_method: super::HandshakeMethod) {
     println!(
-        "Server listening on TCP 127.0.0.1:{} and UDP 127.0.0.1:{}",
+        "Server listening on TCP 127.0.0.1:{} and UDP 127.0.0.1:{} using {} encryption",
         super::TCP_PORT,
-        super::UDP_PORT
+        super::UDP_PORT,
+        handshake_method
     );
 
     let connections: Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
     let connections_clone: Arc<Mutex<Connections>> = Arc::clone(&connections);
 
-    thread::spawn(move || listen_tcp(connections_clone));
+    thread::spawn(move || listen_tcp(connections_clone, handshake_method));
     listen_udp(connections);
 }
 
@@ -36,7 +32,7 @@ pub fn listen() {
 /// # Arguments
 ///
 /// * `connections` - A shared, mutable reference to the map of connections.
-fn listen_tcp(connections: Arc<Mutex<Connections>>) {
+fn listen_tcp(connections: Arc<Mutex<Connections>>, method: super::HandshakeMethod) {
     let tcp_listener = TcpListener::bind(format!("127.0.0.1:{}", super::TCP_PORT))
         .expect(&format!("Could not bind port {}", super::TCP_PORT));
     let mut start_time = Instant::now();
@@ -45,8 +41,13 @@ fn listen_tcp(connections: Arc<Mutex<Connections>>) {
         match stream {
             Ok(stream) => {
                 let connections = Arc::clone(&connections);
-                handshake(stream, connections).unwrap_or_else(|error| eprintln!("{:?}", error));
-                handshakes += 1;
+                match handshake::handshake(stream, connections, method.clone()) {
+                    Ok(_) => handshakes += 1,
+                    Err(e) => {
+                        eprintln!("{:?}", e);
+                        continue;
+                    }
+                }
                 if start_time.elapsed() >= Duration::from_secs(1) {
                     println!("Handshakes per second: {}", handshakes);
                     handshakes = 0;
@@ -99,24 +100,27 @@ fn listen_udp(connections: Arc<Mutex<Connections>>) {
             }
         };
 
-        if let Some(shared_secret) = connections.get(&peer_addr.ip()) {
-            let nonce = &buf[..12];
-            let ciphertext = &buf[12..amt];
-            match crypter::decrypt(shared_secret.clone(), nonce, ciphertext) {
+        let id_bytes = &buf[..4];
+        let id = u32::from_be_bytes([id_bytes[0], id_bytes[1], id_bytes[2], id_bytes[3]]);
+        let ip_num = ip::ip_to_u32(peer_addr.ip());
+        let client_id = ((ip_num as u64) << 32) + id as u64;
+
+        if let Some(kem) = connections.get(&client_id) {
+            match crypter::decrypt(kem, &buf[4..amt]) {
                 Ok(data) => match String::from_utf8(data) {
-                    Ok(string) => (),
+                    Ok(string) => println!("Got message: {}", string),
                     Err(e) => {
                         eprintln!("Failed to convert data to string: {}", e);
                         error_packets += 1;
                     }
                 },
-                Err(e) => {
+                Err(_e) => {
                     //eprintln!("Failed to decrypt data: {}", e);
                     error_packets += 1;
                 }
             }
         } else {
-            eprintln!("No shared secret for peer: {}", peer_addr.ip());
+            eprintln!("No shared secret for id: {}", id);
             error_packets += 1;
         }
 
@@ -126,64 +130,14 @@ fn listen_udp(connections: Arc<Mutex<Connections>>) {
                 let error_rate = error_packets as f64 / total_packets as f64;
                 println!("Error rate: {:.2}%", error_rate * 100.0);
             }
+            println!(
+                "Packets per second: {}, ({})",
+                total_packets - error_packets,
+                total_packets
+            );
             total_packets = 0;
             error_packets = 0;
             start_time = Instant::now();
         }
     }
-}
-
-/// Performs a handshake with a client.
-///
-/// # Arguments
-///
-/// * `stream` - The TCP stream for the client.
-/// * `connections` - A shared, mutable reference to the map of connections.
-///
-/// # Errors
-///
-/// Returns an error if the handshake cannot be performed.
-fn handshake(
-    mut stream: TcpStream,
-    connections: Arc<Mutex<Connections>>,
-) -> Result<(), Box<dyn Error>> {
-    let peer_addr = stream.peer_addr()?;
-    //println!("Incoming TCP connection from: {}", peer_addr);
-
-    let mut buf = vec![0; 1184];
-    stream.read_exact(&mut buf)?;
-    let data = buf;
-    //println!("Received: {}", base64_vec(&data));
-
-    let kemalg = kem::Kem::new(kem::Algorithm::Kyber768)
-        .map_err(|e| format!("Failed to create KEM: {}", e))?;
-    let kem_pk = kemalg
-        .public_key_from_bytes(&data)
-        .ok_or("Failed to create public key from bytes")?;
-    let (kem_ct, kem_ss) = kemalg
-        .encapsulate(&kem_pk)
-        .map_err(|e| format!("Failed to encapsulate: {}", e))?;
-
-    let mut connections = connections
-        .lock()
-        .map_err(|e| format!("Failed to lock connection: {}", e))?;
-    connections.insert(peer_addr.ip(), kem_ss.clone());
-    //println!("Shared key is: {}", base64_vec(&kem_ss.into_vec()));
-
-    let data2 = kem_ct.into_vec();
-    //println!("Size of {}", data2.len());
-    //println!("Sent: {}", base64_vec(&data2));
-
-    stream.write_all(&data2)?;
-
-    Ok(())
-}
-
-/// Encodes a vector of bytes to a base64 string.
-///
-/// # Arguments
-///
-/// * `data` - The data to encode.
-fn base64_vec(data: &Vec<u8>) -> String {
-    return engine::general_purpose::STANDARD.encode(data);
 }

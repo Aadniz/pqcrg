@@ -28,11 +28,11 @@ pub fn kyber(
     connections: Arc<Mutex<Connections>>,
 ) -> Result<(), Box<dyn Error>> {
     let peer_addr = stream.peer_addr()?;
-    println!("Incoming TCP connection from: {}", peer_addr);
+    //println!("Incoming TCP connection from: {}", peer_addr);
 
     let mut buf = vec![0; 4 + 1184];
     stream.read_exact(&mut buf)?;
-    println!("Received: {:?}", &buf.to_vec());
+    //println!("Received: {:?}", &buf.to_vec());
 
     // Split the buffer into the ID and the public key
     let (id_bytes, data) = buf.split_at(4);
@@ -40,7 +40,7 @@ pub fn kyber(
     let id = u32::from_be_bytes([id_bytes[0], id_bytes[1], id_bytes[2], id_bytes[3]]);
     let ip_num = ip::ip_to_u32(peer_addr.ip());
     let client_id = ((ip_num as u64) << 32) + id as u64;
-    println!("id is: {}", id);
+    //println!("id is: {}", id);
     //println!("Received: {:?}", &data.to_vec());
 
     let kemalg = kem::Kem::new(kem::Algorithm::Kyber768)
@@ -56,11 +56,11 @@ pub fn kyber(
         .lock()
         .map_err(|e| format!("Failed to lock connection: {}", e))?;
     connections.insert(client_id, super::KEM::Kyber(kem_ss.clone()));
-    println!("Shared key is: {}", base64_vec(&kem_ss.into_vec()));
+    //println!("Shared key is: {}", base64_vec(&kem_ss.into_vec()));
 
     let data2 = kem_ct.into_vec();
-    println!("Size of {}", data2.len());
-    println!("Sent: {}", base64_vec(&data2));
+    //println!("Size of {}", data2.len());
+    //println!("Sent: {}", base64_vec(&data2));
 
     stream.write_all(&data2)?;
 
@@ -76,7 +76,7 @@ pub fn rsa(
     // Receive public key from client
     let mut buf = vec![0; 4 + 451]; // 2048-bit = 256 bytes
     stream.read_exact(&mut buf)?;
-    println!("Received: {:?}", &buf.to_vec());
+    //println!("Received: {:?}", &buf.to_vec());
 
     // Split the buffer into the ID and the public key
     let (id_bytes, data) = buf.split_at(4);
@@ -84,7 +84,7 @@ pub fn rsa(
     let id = u32::from_be_bytes([id_bytes[0], id_bytes[1], id_bytes[2], id_bytes[3]]);
     let ip_num = ip::ip_to_u32(peer_addr.ip());
     let client_id = ((ip_num as u64) << 32) + id as u64;
-    println!("id is: {}", id);
+    //println!("id is: {}", id);
 
     let public_key = data.to_vec();
     let public_key = Rsa::public_key_from_pem(&public_key)?;
@@ -94,7 +94,7 @@ pub fn rsa(
         .map_err(|e| format!("Failed to lock connection: {}", e))?;
     connections.insert(client_id, super::KEM::Rsa(public_key));
 
-    println!("Size of {}", &super::PUB_KEY.len());
+    //println!("Size of {}", &super::PUB_KEY.len());
     stream.write_all(&super::PUB_KEY)?;
 
     Ok(())

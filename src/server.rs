@@ -108,19 +108,19 @@ fn listen_udp(connections: Arc<Mutex<Connections>>) {
         if let Some(kem) = connections.get(&client_id) {
             match crypter::decrypt(kem, &buf[4..amt]) {
                 Ok(data) => match String::from_utf8(data) {
-                    Ok(string) => println!("Got message: {}", string),
+                    Ok(string) => (), //println!("Got message: {}", string),
                     Err(e) => {
                         eprintln!("Failed to convert data to string: {}", e);
                         error_packets += 1;
                     }
                 },
-                Err(_e) => {
-                    //eprintln!("Failed to decrypt data: {}", e);
+                Err(e) => {
+                    eprintln!("Failed to decrypt data: {}", e);
                     error_packets += 1;
                 }
             }
         } else {
-            eprintln!("No shared secret for id: {}", id);
+            //eprintln!("No shared secret for id: {}", id);
             error_packets += 1;
         }
 

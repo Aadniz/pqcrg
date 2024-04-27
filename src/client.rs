@@ -29,7 +29,7 @@ impl Client {
         // Binding to 0.0.0.0:0 means it is random
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
         let id = rand::thread_rng().gen();
-        println!("\nid is: {}", id);
+        //println!("\nid is: {}", id);
         Client {
             id,
             socket,
@@ -77,7 +77,7 @@ impl Client {
     /// Returns an error if the handshake cannot be performed.
     fn handshake(&mut self, ip: IpAddr) -> Result<super::KEM, Box<dyn Error>> {
         let addr = SocketAddr::new(ip, super::TCP_PORT);
-        println!("New connection to {}, exchanging keys", addr);
+        //println!("New connection to {}, exchanging keys", addr);
 
         let kem = match self.method {
             HandshakeMethod::Kyber => self.kyber_kem(addr)?,
@@ -87,11 +87,11 @@ impl Client {
 
         self.connections.insert(ip, kem.clone());
 
-        match kem.clone() {
-            crate::KEM::Kyber(k) => println!("Key is: {}", base64_vec(&k.clone().into_vec())),
-            crate::KEM::Rsa(k) => println!("Key is: {:?}", k.clone()),
-            crate::KEM::None => println!("No key"),
-        }
+        //match kem.clone() {
+        //    crate::KEM::Kyber(k) => println!("Key is: {}", base64_vec(&k.clone().into_vec())),
+        //    crate::KEM::Rsa(k) => println!("Key is: {:?}", k.clone()),
+        //    crate::KEM::None => println!("No key"),
+        //}
 
         Ok(kem)
     }
@@ -111,8 +111,8 @@ impl Client {
         // Bake id into data
         let mut data = self.id.to_be_bytes().to_vec();
         data.extend(keypair.public_key);
-        println!("Size of {}", data.len());
-        println!("Sent: {:?}", &data);
+        //println!("Size of {}", data.len());
+        //println!("Sent: {:?}", &data);
         stream.write_all(&data)?;
 
         let mut buf = [0; 451]; // Assuming the server's public key is also 2048-bit
@@ -120,7 +120,7 @@ impl Client {
 
         let server_public_key = buf.to_vec();
         let rsa_pub_key = Rsa::public_key_from_pem(&server_public_key)?;
-        println!("Received: {}", base64_vec(&server_public_key));
+        //println!("Received: {}", base64_vec(&server_public_key));
 
         Ok(super::KEM::Rsa(rsa_pub_key))
     }
@@ -134,14 +134,14 @@ impl Client {
         // Bake id into data
         let mut data = self.id.to_be_bytes().to_vec();
         data.extend(kem_pk.clone().into_vec());
-        println!("Size of {}", data.len());
-        println!("Sent: {:?}", &data);
+        //println!("Size of {}", data.len());
+        //println!("Sent: {:?}", &data);
         stream.write_all(&data)?;
 
         let mut buf = [0; 1088];
         stream.read_exact(&mut buf)?;
         let data2 = buf;
-        println!("Received: {}", base64_vec(&data2.to_vec()));
+        //println!("Received: {}", base64_vec(&data2.to_vec()));
         let kem_ct = kemalg
             .ciphertext_from_bytes(&data2)
             .ok_or("No ciphered text was generated")?;

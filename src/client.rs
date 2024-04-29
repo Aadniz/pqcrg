@@ -82,7 +82,7 @@ impl Client {
         let kem = match self.method {
             HandshakeMethod::Kyber => self.kyber_kem(addr)?,
             HandshakeMethod::Rsa => self.rsa_kem(addr)?,
-            HandshakeMethod::None => super::KEM::None,
+            HandshakeMethod::None => self.no_kem(addr)?,
         };
 
         self.connections.insert(ip, kem.clone());
@@ -123,6 +123,27 @@ impl Client {
         //println!("Received: {}", base64_vec(&server_public_key));
 
         Ok(super::KEM::Rsa(rsa_pub_key))
+    }
+
+    fn no_kem(&mut self, addr: SocketAddr) -> Result<super::KEM, Box<dyn Error>> {
+        let dummy_handshake = "hello";
+
+        let mut stream = TcpStream::connect(addr)?;
+
+        // Bake id into data
+        let mut data = self.id.to_be_bytes().to_vec();
+        data.extend(dummy_handshake.as_bytes());
+        //println!("Size of {}", data.len());
+        //println!("Sent: {:?}", &data);
+        stream.write_all(&data)?;
+
+        let mut buf = [0; 5]; // Assuming the server's public key is also 2048-bit
+        stream.read_exact(&mut buf)?;
+
+        //let dummy_response = buf.to_vec();
+        //println!("Received: {}", String::from_utf8(dummy_response)?);
+
+        Ok(super::KEM::None)
     }
 
     fn kyber_kem(&mut self, addr: SocketAddr) -> Result<super::KEM, Box<dyn Error>> {

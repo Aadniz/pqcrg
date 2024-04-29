@@ -23,8 +23,21 @@ pub fn listen(handshake_method: super::HandshakeMethod) {
     let connections: Arc<Mutex<Connections>> = Arc::new(Mutex::new(HashMap::new()));
     let connections_clone: Arc<Mutex<Connections>> = Arc::clone(&connections);
 
-    thread::spawn(move || listen_tcp(connections_clone, handshake_method));
-    listen_udp(connections);
+    let tcp_thread = thread::Builder::new()
+        .name("tcp_listener".to_string())
+        .spawn(move || listen_tcp(connections_clone, handshake_method))
+        .unwrap();
+    let udp_thread = thread::Builder::new()
+        .name("udp_listener".to_string())
+        .spawn(move || listen_udp(connections))
+        .unwrap();
+
+    if let Err(e) = tcp_thread.join() {
+        eprint!("tcp_listener thread panicked: {:?}", e);
+    }
+    if let Err(e) = udp_thread.join() {
+        eprint!("udp_listener thread panicked: {:?}", e);
+    }
 }
 
 /// Listens for incoming TCP connections.

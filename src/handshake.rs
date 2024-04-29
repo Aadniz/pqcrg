@@ -19,8 +19,42 @@ pub fn handshake(
     match handshake_method {
         HandshakeMethod::Kyber => kyber(stream, connections),
         HandshakeMethod::Rsa => rsa(stream, connections),
-        HandshakeMethod::None => Ok(()),
+        HandshakeMethod::None => none(stream, connections),
     }
+}
+
+pub fn none(
+    mut stream: TcpStream,
+    connections: Arc<Mutex<Connections>>,
+) -> Result<(), Box<dyn Error>> {
+    let peer_addr = stream.peer_addr()?;
+    //println!("Incoming TCP connection from: {}", peer_addr);
+
+    let mut buf = vec![0; 4 + 5];
+    stream.read_exact(&mut buf)?;
+    //println!("Received: {:?}", &buf.to_vec());
+
+    // Split the buffer into the ID and the public key
+    let (id_bytes, data) = buf.split_at(4);
+    // Convert the ID to a u32
+    let id = u32::from_be_bytes([id_bytes[0], id_bytes[1], id_bytes[2], id_bytes[3]]);
+    let ip_num = ip::ip_to_u32(peer_addr.ip());
+    let client_id = ((ip_num as u64) << 32) + id as u64;
+    //println!("id is: {}", id);
+    //println!("Received: {:?}", &data.to_vec());
+
+    let mut connections = connections
+        .lock()
+        .map_err(|e| format!("Failed to lock connection: {}", e))?;
+    connections.insert(client_id, super::KEM::None);
+
+    let dummy_response: [u8; 5] = [104, 101, 108, 108, 111];
+    //println!("Size of {}", dummy_response.len());
+    //println!("Sent: {}", dummy_response);
+
+    stream.write_all(&dummy_response)?;
+
+    Ok(())
 }
 
 pub fn kyber(

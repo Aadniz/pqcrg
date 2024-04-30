@@ -1,16 +1,16 @@
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
-from library.pqcrypto.pqcrypto.kem import frodokem1344aes
+from library.pqcrypto.pqcrypto.kem import lightsaber
 import socket
 
 from .communication import Communication
 
 
-class FrodoKEMAESCBCEncryption(Communication):
+class LightsaberKEMAESCBCEncryption(Communication):
     def __init__(self, transport_layer):
         super().__init__(transport_layer)
-        self.pubkey, self.privkey = frodokem1344aes.generate_keypair()
+        self.pubkey, self.privkey = lightsaber.generate_keypair()
 
     def encrypt(self, host: str, message: str) -> bytes:
         if host not in self._connections:
@@ -22,7 +22,7 @@ class FrodoKEMAESCBCEncryption(Communication):
 
     def decrypt(self, message: bytes, host: str = None) -> bytes:
         if host is None:
-            raise Exception(f"FrodoKEM-AES requires host to be known when decrypting!")
+            raise Exception(f"LightsaberKEM-AES requires host to be known when decrypting!")
         if host not in self._connections:
             raise Exception(f"{host} does not have a public key set!")
         key = self._connections[host]["key"]
@@ -40,21 +40,22 @@ class FrodoKEMAESCBCEncryption(Communication):
         if data is not None:
             client_pubkey = data
         elif socket is not None:
-            client_pubkey = conn.recv(21520)
+            client_pubkey = conn.recv(672)
         else:
             raise Exception(f"conn or data must be set in recv_handshake")
         #print(f"[SERVER]: Got handshake: {client_pubkey}")
-        ciphertext, plaintext_original = frodokem1344aes.encrypt(client_pubkey)
+        ciphertext, plaintext_original = lightsaber.encrypt(client_pubkey)
         self.add_connection(host, conn, plaintext_original)
 
         #print(f"[SERVER]: Using key {plaintext_original}")
+        #print(f"[SERVER]: sending ciphertext {ciphertext}")
+        print(f"[SERVER]: ciphertext length: {len(ciphertext)}")
 
         # Send the server's public key
         if self._sock.type == socket.SOCK_STREAM:
             conn.sendall(ciphertext)
         else:
             conn.sendto(ciphertext, peer)
-        #print(f"[SERVER]: sending ciphertext {ciphertext}")
 
     def send_handshake(self, peer: tuple[str, int]):
         host, port = peer
@@ -65,14 +66,9 @@ class FrodoKEMAESCBCEncryption(Communication):
         self._sock.sendall(self.handshake())
 
         # Receive and store the server's public key
-        ciphertext = b''
-        while len(ciphertext) < 21632:
-            chunk = self._sock.recv(21632 - len(ciphertext))
-            if not chunk:
-                raise Exception("Socket connection broken")
-            ciphertext += chunk
+        ciphertext = self._sock.recv(736)
         #print(f"[CLIENT]: Got ciphertext {ciphertext}")
-        plaintext_recovered = frodokem1344aes.decrypt(self.privkey, ciphertext)
+        plaintext_recovered = lightsaber.decrypt(self.privkey, ciphertext)
         self.add_connection(host, self._sock, plaintext_recovered)
 
         #print(f"[CLIENT]: Using key {plaintext_recovered}")

@@ -1,4 +1,5 @@
 import socket
+import os
 import struct
 import threading
 
@@ -27,9 +28,13 @@ class Communication:
         host, port = peer
 
         if not self.has_connection(host):
-            self.send_handshake(peer)
+            try:
+                self.send_handshake(peer)
+            except ConnectionRefusedError as e:
+                print(e)
+                os._exit(1)
 
-        #print(f"[CLIENT]: Sending encrypted message: {message} ...")
+        print(f"[CLIENT]: Sending encrypted message: {message} ...")
 
         # Encrypt the message
         crypto = self.encrypt(host, message)
@@ -63,10 +68,10 @@ class Communication:
             # Decrypt the message
             message = self.decrypt(crypto, host).decode('utf-8')
 
-            #print(f"[SERVER]: Received encrypted message from {host}: {message}")
+            print(f"[SERVER]: Received encrypted message from {host}: {message}")
             if message == "Done":
                 self._sock.close()
-                #print("Closing connection")
+                print("Closing connection")
                 return
 
     def listen(self):

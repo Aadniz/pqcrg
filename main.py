@@ -1,5 +1,6 @@
 import threading
-import time
+import sys
+
 from client import client
 from server import server
 
@@ -9,6 +10,7 @@ from settings import ENCRYPTION_METHOD
 from settings import TRANSPORT_LAYER
 
 if __name__ == "__main__":
+    PORT = sys.argv[1] if len(sys.argv) > 1 else PORT
 
     print(f"[SYSTEM] Using settings:")
     print(f"   port: {PORT}")

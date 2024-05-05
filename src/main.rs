@@ -3,6 +3,7 @@ use oqs::*;
 use std::net::{IpAddr, Ipv4Addr};
 
 mod client;
+mod crypter;
 mod server;
 
 pub const TCP_PORT: u16 = 2522;

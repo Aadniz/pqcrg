@@ -3,9 +3,13 @@
 # Exit script on first error
 set -e
 
+# Create a named pipe
+pipe=$(mktemp -u)
+mkfifo $pipe
+
 #       test-ENC
 #       test-kyber
-folder="test-rsa-no-print"
+folder="test-kyber-no-print"
 
 # Make folder if not exists
 
@@ -13,50 +17,26 @@ if [ ! -d "$folder" ]; then
   mkdir "$folder"
 fi
 
-for i in {1..100}
+for i in {1..1000}
 do
-  file="$folder/test_$i.pcap"
+  file="$folder/test_$i.txt"
   if [ -f "$file" ]; then
     echo "File $file already exists, skipping..."
     continue
   fi
-  echo "Starting tshark, capturing to $file"
 
-  if [ ! -p "/tmp/tshark-output" ]; then
-    mkfifo /tmp/tshark-output
-  fi
+  # Start the server in the background, redirect its output to the named pipe
+  ../target/release/pqcrg server >> $file &
 
-  tshark -i lo -f 'tcp port 2522 or udp port 2525' -w "$file" > /tmp/tshark-output 2>&1 &
-  TSHARK_PID=$!
-
-  # Wait for tshark to start capturing
-  while IFS= read -r line
-  do
-    echo "$line"
-    if [[ "$line" == *"Capturing on"* ]]; then
-      break
-    fi
-  done < /tmp/tshark-output
-
-  echo "Running rust ../target/release/pqcrg server"
-  ../target/release/pqcrg server &
+  # Save the PID of the background process
   SERVER_PID=$!
 
+  # Wait for the server to start up
   sleep 1
 
-  ../target/release/pqcrg &
-  CLIENT_PID=$!
+  # Start the client, capture its output
+  ../target/release/pqcrg client >> $file &
 
-  sleep 2
-
-  echo "Interrupting PID $TSHARK_PID"
-  kill -INT "$TSHARK_PID"
-
-  echo "Interrupting Server $SERVER_PID and Client $CLIENT_PID"
-  kill -TERM "$SERVER_PID"
-
-  if kill -0 $CLIENT_PID > /dev/null 2>&1; then
-      echo "Client $CLIENT_PID is still running. It's likely hanging"
-      exit 1
-  fi
+  # Wait for the server process to finish
+  wait $SERVER_PID
 done

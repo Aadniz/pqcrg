@@ -1,7 +1,7 @@
+use super::crypter;
 use base64::{engine::general_purpose, Engine as _};
-use rsa::pkcs1::DecodeRsaPublicKey;
-use rsa::pkcs8::LineEnding;
-use rsa::{pkcs1::EncodeRsaPublicKey, Pkcs1v15Encrypt, RsaPrivateKey, RsaPublicKey};
+use oqs::kem;
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::{
     collections::HashMap,
     error::Error,
@@ -14,9 +14,8 @@ use std::{
 /// The `Client` struct represents a client in a client-server model.
 pub struct Client {
     socket: UdpSocket,
-    _secret_key: RsaPrivateKey,
-    public_key: RsaPublicKey,
-    connections: HashMap<IpAddr, RsaPublicKey>,
+    kemalg: kem::Kem,
+    connections: HashMap<IpAddr, kem::SharedSecret>,
 }
 
 impl Client {
@@ -24,14 +23,10 @@ impl Client {
     pub fn new() -> Client {
         // Binding to 0.0.0.0:0 means it is random
         let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
-        let mut rng = rand::thread_rng();
-        let bits = 2048;
-        let _secret_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-        let public_key = RsaPublicKey::from(&_secret_key);
+        let kemalg = kem::Kem::new(kem::Algorithm::Kyber768).unwrap();
         Client {
             socket,
-            _secret_key,
-            public_key,
+            kemalg,
             connections: HashMap::new(),
         }
     }
@@ -48,16 +43,16 @@ impl Client {
     /// Returns an error if the message cannot be sent.
     pub fn send(&mut self, ip: IpAddr, msg: &str) -> Result<(), Box<dyn Error>> {
         let addr = SocketAddr::new(ip, super::UDP_PORT);
-        let peer_public_key: RsaPublicKey = match self.connections.get(&ip) {
-            Some(peer_public_key) => peer_public_key.clone(),
+        let shared_secret = match self.connections.get(&ip) {
+            Some(shared_secret) => shared_secret.clone(),
             None => self.handshake(ip)?,
         };
 
-        let mut rng = rand::thread_rng();
-        let encrypted_msg = peer_public_key
-            .encrypt(&mut rng, Pkcs1v15Encrypt, msg.as_bytes())
+        let (nonce, ciphertext) = crypter::encrypt(shared_secret, msg.as_bytes())
             .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error.to_string()))?;
-        self.socket.send_to(&encrypted_msg, addr)?;
+        let mut data = nonce;
+        data.extend(ciphertext);
+        self.socket.send_to(&data, addr)?;
 
         Ok(())
     }
@@ -71,30 +66,57 @@ impl Client {
     /// # Errors
     ///
     /// Returns an error if the handshake cannot be performed.
-    fn handshake(&mut self, ip: IpAddr) -> Result<RsaPublicKey, Box<dyn Error>> {
+    fn handshake(&mut self, ip: IpAddr) -> Result<kem::SharedSecret, Box<dyn Error>> {
         let addr = SocketAddr::new(ip, super::TCP_PORT);
-        println!("New connection to {}, exchanging keys", addr);
+        //println!("New connection to {}, exchanging keys", addr);
+
+        let (kem_pk, kem_sk) = self.kemalg.keypair().map_err(to_io_error)?;
 
         let mut stream = TcpStream::connect(addr)?;
-        let data = self.public_key.to_pkcs1_pem(LineEnding::LF)?.into_bytes();
-        println!("Size of {}", data.len());
-        println!("Sent: {}", base64_vec(&data));
+        let data = kem_pk.into_vec();
+        //println!("Size of {}", data.len());
+        //println!("Sent: {}", base64_vec(&data));
+        println!(
+            "Sending handshake: {}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs_f64()
+                * 1000.0
+        );
         stream.write_all(&data)?;
 
-        let mut buf = vec![0; 426];
+        let mut buf = [0; 1088];
         stream.read_exact(&mut buf)?;
         let data2 = buf;
-        println!("Received: {}", base64_vec(&data2.to_vec()));
-        let peer_public_key = RsaPublicKey::from_pkcs1_pem(std::str::from_utf8(&data2).unwrap())?;
+        //println!("Received: {}", base64_vec(&data2.to_vec()));
+        let kem_ct = self
+            .kemalg
+            .ciphertext_from_bytes(&data2)
+            .ok_or("No ciphered text was generated")?;
 
-        self.connections.insert(ip, peer_public_key.clone());
+        let kem_ss = self
+            .kemalg
+            .decapsulate(&kem_sk, &kem_ct)
+            .map_err(to_io_error)?;
 
         println!(
-            "Peer public key is: {}",
-            &peer_public_key.clone().to_pkcs1_pem(LineEnding::LF)?
+            "Handshake done: {}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs_f64()
+                * 1000.0
         );
 
-        Ok(peer_public_key)
+        self.connections.insert(ip, kem_ss.clone());
+
+        //println!(
+        //    "Peer public key is: {}",
+        //    &peer_public_key.clone().to_pkcs1_pem(LineEnding::LF)?
+        //);
+
+        Ok(kem_ss)
     }
 }
 
@@ -103,7 +125,7 @@ impl Client {
 /// # Arguments
 ///
 /// * `e` - The `oqs::Error` to convert.
-fn _to_io_error(e: oqs::Error) -> io::Error {
+fn to_io_error(e: oqs::Error) -> io::Error {
     io::Error::new(ErrorKind::Other, e.to_string())
 }
 

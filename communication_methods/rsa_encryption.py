@@ -11,7 +11,8 @@ from settings import ENCRYPTION_METHOD
 class RSAEncryption(Communication):
     def __init__(self, transport_layer):
         super().__init__(transport_layer)
-        self.pubkey, self.privkey = rsa.newkeys(512)
+        pubkey, self.privkey = rsa.newkeys(2048)
+        self.pubkey = pubkey.save_pkcs1()
 
     def encrypt(self, host: str, message: str) -> bytes:
         if host not in self._connections:
@@ -54,4 +55,4 @@ class RSAEncryption(Communication):
         self.add_connection(host, self._sock, rsa.PublicKey.load_pkcs1(server_pubkey.decode('utf-8')))
 
     def handshake(self) -> bytes:
-        return self.pubkey.save_pkcs1()
+        return self.pubkey

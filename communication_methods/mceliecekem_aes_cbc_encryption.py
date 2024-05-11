@@ -5,6 +5,7 @@ from library.pqcrypto.pqcrypto.kem import mceliece8192128
 import socket
 
 from .communication import Communication
+from settings import BUFFER_SIZE
 
 
 class McelieceKEMAESCBCEncryption(Communication):
@@ -48,13 +49,14 @@ class McelieceKEMAESCBCEncryption(Communication):
                 client_pubkey += chunk
         else:
             raise Exception(f"conn or data must be set in recv_handshake")
+        #print(f"[SERVER]: Received handshake of length: {len(client_pubkey)}")
         #print(f"[SERVER]: Got handshake: {client_pubkey}")
         ciphertext, plaintext_original = mceliece8192128.encrypt(client_pubkey)
         self.add_connection(host, conn, plaintext_original)
 
         #print(f"[SERVER]: Using key {plaintext_original}")
         #print(f"[SERVER]: sending ciphertext {ciphertext}")
-        print(f"[SERVER]: ciphertext length: {len(ciphertext)}")
+        #print(f"[SERVER]: ciphertext length: {len(ciphertext)}")
 
         # Send the server's public key
         if self._sock.type == socket.SOCK_STREAM:
@@ -66,9 +68,12 @@ class McelieceKEMAESCBCEncryption(Communication):
         host, port = peer
         #print(f"[CLIENT]: Sending handshake to: {host}:{port} ...")
         #print(f"[CLIENT]: {self.handshake()}")
-        print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
+        #print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
         self._sock.connect(peer)
-        self._sock.sendall(self.handshake())
+        message = self.handshake()
+        for i in range(0, len(message), BUFFER_SIZE):
+            chunk = message[i:i+BUFFER_SIZE]
+            self._sock.send(chunk)
 
         # Receive and store the server's public key
         ciphertext = self._sock.recv(240)

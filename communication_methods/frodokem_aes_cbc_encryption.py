@@ -60,7 +60,7 @@ class FrodoKEMAESCBCEncryption(Communication):
         host, port = peer
         #print(f"[CLIENT]: Sending handshake to: {host}:{port} ...")
         #print(f"[CLIENT]: {self.handshake()}")
-        print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
+        #print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
         self._sock.connect(peer)
         self._sock.sendall(self.handshake())
 

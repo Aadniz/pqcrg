@@ -49,7 +49,7 @@ class NtruhrssKEMAESCBCEncryption(Communication):
 
         #print(f"[SERVER]: Using key {plaintext_original}")
         #print(f"[SERVER]: sending ciphertext {ciphertext}")
-        print(f"[SERVER]: ciphertext length: {len(ciphertext)}")
+        #print(f"[SERVER]: ciphertext length: {len(ciphertext)}")
 
         # Send the server's public key
         if self._sock.type == socket.SOCK_STREAM:
@@ -61,7 +61,7 @@ class NtruhrssKEMAESCBCEncryption(Communication):
         host, port = peer
         #print(f"[CLIENT]: Sending handshake to: {host}:{port} ...")
         #print(f"[CLIENT]: {self.handshake()}")
-        print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
+        #print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
         self._sock.connect(peer)
         self._sock.sendall(self.handshake())
 

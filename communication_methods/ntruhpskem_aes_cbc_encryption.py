@@ -1,7 +1,7 @@
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
-from library.pqcrypto.pqcrypto.kem import ntruhps2048677
+from library.pqcrypto.pqcrypto.kem import ntruhps4096821
 import socket
 
 from .communication import Communication
@@ -10,7 +10,7 @@ from .communication import Communication
 class NtruhpsKEMAESCBCEncryption(Communication):
     def __init__(self, transport_layer):
         super().__init__(transport_layer)
-        self.pubkey, self.privkey = ntruhps2048677.generate_keypair()
+        self.pubkey, self.privkey = ntruhps4096821.generate_keypair()
 
     def encrypt(self, host: str, message: str) -> bytes:
         if host not in self._connections:
@@ -40,16 +40,16 @@ class NtruhpsKEMAESCBCEncryption(Communication):
         if data is not None:
             client_pubkey = data
         elif socket is not None:
-            client_pubkey = conn.recv(930)
+            client_pubkey = conn.recv(1230)
         else:
             raise Exception(f"conn or data must be set in recv_handshake")
         #print(f"[SERVER]: Got handshake: {client_pubkey}")
-        ciphertext, plaintext_original = ntruhps2048677.encrypt(client_pubkey)
+        ciphertext, plaintext_original = ntruhps4096821.encrypt(client_pubkey)
         self.add_connection(host, conn, plaintext_original)
 
         #print(f"[SERVER]: Using key {plaintext_original}")
         #print(f"[SERVER]: sending ciphertext {ciphertext}")
-        print(f"[SERVER]: ciphertext length: {len(ciphertext)}")
+        #print(f"[SERVER]: ciphertext length: {len(ciphertext)}")
 
         # Send the server's public key
         if self._sock.type == socket.SOCK_STREAM:
@@ -61,14 +61,14 @@ class NtruhpsKEMAESCBCEncryption(Communication):
         host, port = peer
         #print(f"[CLIENT]: Sending handshake to: {host}:{port} ...")
         #print(f"[CLIENT]: {self.handshake()}")
-        print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
+        #print(f"[CLIENT]: Handshake length: {len(self.handshake())}")
         self._sock.connect(peer)
         self._sock.sendall(self.handshake())
 
         # Receive and store the server's public key
-        ciphertext = self._sock.recv(930)
+        ciphertext = self._sock.recv(1230)
         #print(f"[CLIENT]: Got ciphertext {ciphertext}")
-        plaintext_recovered = ntruhps2048677.decrypt(self.privkey, ciphertext)
+        plaintext_recovered = ntruhps4096821.decrypt(self.privkey, ciphertext)
         self.add_connection(host, self._sock, plaintext_recovered)
 
         #print(f"[CLIENT]: Using key {plaintext_recovered}")

@@ -6,6 +6,7 @@ mkShell rec {
   name = "impurePythonEnv";
   venvDir = "venv";
   buildInputs = [
+    stdenv.cc.cc.lib
   ] ++ (with python3Packages; [
     python
     semgrep
@@ -13,6 +14,7 @@ mkShell rec {
     python-lsp-server
     poetry-core
   ]);
+  LD_LIBRARY_PATH = "${stdenv.cc.cc.lib}/lib";
 
   # This is very close to how venvShellHook is implemented, but
   # adapted to use 'virtualenv'

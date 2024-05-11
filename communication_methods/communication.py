@@ -2,10 +2,21 @@ import socket
 import os
 import struct
 import threading
+import time
 
 from settings import PORT
 from settings import BUFFER_SIZE
 from settings import ENCRYPTION_METHOD
+
+MESSAGES = [
+    'Hello from client',
+    'This is a message',
+    'One',
+    'Two',
+    'Three',
+    'Four',
+    'Done',
+]
 
 class Communication:
     _sock: socket = None
@@ -29,12 +40,14 @@ class Communication:
 
         if not self.has_connection(host):
             try:
+                print(f"Sending handshake: {round(time.time()*1000, 3)}")
                 self.send_handshake(peer)
+                print(f"Handshake done: {round(time.time()*1000, 3)}")
             except ConnectionRefusedError as e:
                 print(e)
                 os._exit(1)
 
-        print(f"[CLIENT]: Sending encrypted message: {message} ...")
+        #print(f"[CLIENT]: Sending encrypted message: {message} ...")
 
         # Encrypt the message
         crypto = self.encrypt(host, message)
@@ -47,13 +60,19 @@ class Communication:
             data = crypto
 
         # Send the length followed by the message
-        self._sock.sendall(data)
+        try:
+            self._sock.sendall(data)
+        except ConnectionRefusedError as e:
+            print(e)
+            os._exit(1)
+
 
     def recv(self, conn: socket, peer: tuple[str, int]):
         host, port = peer
         if not self.has_connection(host):
             self.recv_handshake(peer, conn)
 
+        successes = 0
         while True:
             # Receive the length of the message (4 bytes)
             first_four_bytes = conn.recv(4)
@@ -68,17 +87,29 @@ class Communication:
             # Decrypt the message
             message = self.decrypt(crypto, host).decode('utf-8')
 
-            print(f"[SERVER]: Received encrypted message from {host}: {message}")
+            #print(f"[SERVER]: Received encrypted message from {host}: {message}")
+            if message in MESSAGES:
+                successes += 1
             if message == "Done":
+                if successes != 7:
+                    os._exit(1)
+                print(f"Done: {round(time.time()*1000, 3)}")
                 self._sock.close()
-                print("Closing connection")
+                #print("Closing connection")
                 return
 
     def listen(self):
-        self._sock.bind(("127.0.0.1", PORT))
+        try:
+            self._sock.bind(("127.0.0.1", PORT))
+        except OSError as e:
+            print(e)
+            os._exit(1)
         if self._sock.type == socket.SOCK_STREAM:
             self._sock.listen(1)
 
+        successes = 0
+
+        start_time = None
         while True:
             if self._sock.type == socket.SOCK_STREAM:
                 conn, addr = self._sock.accept()
@@ -89,7 +120,12 @@ class Communication:
                 threading.Thread(target=self.recv, args=(conn, addr)).start()
                 return
             elif self._sock.type == socket.SOCK_DGRAM:
-                data, addr = self._sock.recvfrom(21520)
+                data = b''
+                while True:
+                    chunk, addr = self._sock.recvfrom(BUFFER_SIZE)
+                    data += chunk
+                    if len(chunk) < BUFFER_SIZE:
+                        break
                 host, port = addr
 
                 if not self.has_connection(host):
@@ -97,10 +133,18 @@ class Communication:
                     if ENCRYPTION_METHOD is not None:
                         continue
 
+                if start_time is None:
+                    start_time = time.time()
+
                 # Decrypt the message
                 message = self.decrypt(data, host).decode('utf-8')
+                if message in MESSAGES:
+                    successes += 1
                 #print(f"[SERVER]: Received encrypted message from {host}: {message}")
                 if message == "Done":
+                    if successes != 7:
+                        os._exit(1)
+                    print(f"Done: {round(time.time()*1000, 3)}")
                     return
 
     def add_connection(self, host: str, conn: socket, key: any):

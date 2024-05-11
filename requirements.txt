@@ -1,3 +1,5 @@
 rsa~=4.9
 pycryptodome~=3.20.0
 scapy~=2.5.0
+matplotlib~=3.8.3
+seaborn~=0.13.2

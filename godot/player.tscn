@@ -144,6 +144,7 @@ horizontal_alignment = 2
 vertical_alignment = 2
 
 [node name="testbutton" type="Button" parent="."]
+visible = false
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5

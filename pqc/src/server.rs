@@ -189,7 +189,17 @@ fn handshake(
     let mut buf = vec![0; 1184];
     stream.read_exact(&mut buf)?;
     let data = buf;
-    println!("Received: {}", base64_vec(&data));
+    let viewable_data = base64_vec(&data);
+
+    // Truncate the viewable_data to the first 30 characters and the last 30 characters
+    let truncated_data = format!(
+        "{}...{} (size: {})",
+        &viewable_data[..30],
+        &viewable_data[viewable_data.len() - 30..],
+        data.len()
+    );
+
+    println!("Received: {}", truncated_data);
 
     let kemalg = kem::Kem::new(kem::Algorithm::Kyber768)
         .map_err(|e| format!("Failed to create KEM: {}", e))?;
@@ -207,8 +217,17 @@ fn handshake(
     println!("Shared key is: {}", base64_vec(&kem_ss.into_vec()));
 
     let data2 = kem_ct.into_vec();
-    println!("Size of {}", data2.len());
-    println!("Sent: {}", base64_vec(&data2));
+    let viewable_data2 = base64_vec(&data2);
+
+    // Truncate the viewable_data2 to the first 30 characters and the last 30 characters
+    let truncated_data2 = format!(
+        "{}...{} (size: {})",
+        &viewable_data2[..30],
+        &viewable_data2[viewable_data2.len() - 30..],
+        data2.len()
+    );
+
+    println!("Sent: {}", truncated_data2);
 
     stream.write_all(&data2)?;
 

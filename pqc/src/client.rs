@@ -175,14 +175,33 @@ impl Client {
 
         let mut stream = TcpStream::connect(addr)?;
         let data = kem_pk.into_vec();
-        println!("Size of {}", data.len());
-        println!("Sent: {}", base64_vec(&data));
+        let viewable_data = base64_vec(&data);
+
+        // Truncate the viewable_data to the first 30 characters and the last 30 characters
+        let truncated_data = format!(
+            "{}...{} (size: {})",
+            &viewable_data[..30],
+            &viewable_data[viewable_data.len() - 30..],
+            data.len()
+        );
+
+        println!("Sent: {}", truncated_data);
         stream.write_all(&data)?;
 
         let mut buf = [0; 1088];
         stream.read_exact(&mut buf)?;
         let data2 = buf;
-        println!("Received: {}", base64_vec(&data2.to_vec()));
+        let viewable_data2 = base64_vec(&data2.to_vec());
+
+        // Truncate the viewable_data2 to the first 30 characters and the last 30 characters
+        let truncated_data2 = format!(
+            "{}...{} (size: {})",
+            &viewable_data2[..30],
+            &viewable_data2[viewable_data2.len() - 30..],
+            data2.len()
+        );
+
+        println!("Received: {}", truncated_data2);
         let kem_ct = kemalg
             .ciphertext_from_bytes(&data2)
             .ok_or("No ciphered text was generated")?;

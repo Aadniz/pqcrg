@@ -1,8 +1,8 @@
 # PQCRC
 
-This project demonstrates how one can have quantum-resistant cryptography in a fast paced environment, like a racing game.
+This project demonstrates how one can have quantum-resistant cryptography in a fast-paced environment, like a racing game.
 
-This was the Bachelor project of Tønnes (@Lystrous) and Kristian (@Aadniz) at UiA 2024.
+This was the Bachelor project of Tønnes ([@Lystrous](https://github.com/Lystrous)) and Kristian ([@Aadniz](https://github.com/Aadniz)) at UiA 2024.
 
 ![Screenshot of 4 clients in the game](/figures/game.png)
 
@@ -10,7 +10,9 @@ This was the Bachelor project of Tønnes (@Lystrous) and Kristian (@Aadniz) at U
 
 The game uses a local bridge to encrypt its traffic over. The bridge communicates with the server bridge that forwards the packets to its local Godot instance. The entire communication looks like shown below.
 
-![Overview of network flow with 3 clients and 1 host](/figures/host-client-bridge_diagram.svg)
+<p align="center">
+    <img src="/figures/host-client-bridge_diagram.svg" alt="Overview of network flow with 3 clients and 1 host"/>
+</p>
 
 Kyber-768 is used for the key exchange handshake, and AES-GCM is used for encrypting the packets.
 

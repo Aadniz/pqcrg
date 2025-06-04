@@ -2,7 +2,7 @@
 
 This project demonstrates how one can have quantum-resistant cryptography in a fast-paced environment, like a racing game.
 
-This was the Bachelor project of Tønnes ([@Lystrous](https://github.com/Lystrous)) and Kristian ([@Aadniz](https://github.com/Aadniz)) at UiA 2024.
+This was the Bachelor thesis of Tønnes ([@Lystrous](https://github.com/Lystrous)) and Kristian ([@Aadniz](https://github.com/Aadniz)) at UiA 2024.
 
 ![Screenshot of 4 clients in the game](/figures/game.png)
 
@@ -18,14 +18,16 @@ Kyber-768 is used for the key exchange handshake, and AES-GCM is used for encryp
 
 ## Setting up
 
-### Development environment
+<!-- ### Development environment -->
 
-**Dependencies:**
+### Dependencies
 
 - [Godot](https://godotengine.org/) - Game engine
 - [Blender](https://www.blender.org/) - For importing the map
 - [Rust](https://github.com/rust-lang/rust) - For building the bridge
 - [CMake](https://gitlab.kitware.com/cmake/cmake) - for compiling PQC
+
+### Building
 
 Build the PQC bridge first, then start the Godot Editor
 
@@ -38,7 +40,7 @@ $ cargo build --release  # binds to release in Godot
 
 Then open Godot and import the Godot folder.
 
-### Running the game pre-compiled
+<!-- ### Running the game pre-compiled
 
-Go to the release section, and download blarg blah blah.
+ Go to the release section, and download blarg blah blah. -->
 
